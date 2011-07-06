@@ -1,0 +1,14 @@
+#!/bin/bash
+ga
+FRAMEWORKS_PATH=
+if [ -d ../common ]; then
+	FRAMEWORKS_PATH=frameworks_gaia
+else
+	FRAMEWORKS_PATH=frameworks
+fi
+
+cd $FRAMEWORKS_PATH/examples/
+if [ $# -gt 1 ]; then
+	echo $@
+	$@
+fi

@@ -1,0 +1,103 @@
+#!/bin/bash
+# sed 's/\(.*\)\(#[0-9][0-9]\)\s*pc\s*\([0-9a-fA-F]\{,8\}\)\s*\(.*\)/\4 \3/g'
+#
+# translate
+# 01-02 23:21:22.271 I/DEBUG   ( 1326):          #00  pc 00003e10  /system/lib/libandroidregex.so
+# to
+# /system/lib/libandroidregex.so 00003e10
+#
+# this script translates the dump to
+# $GAIA_ROOT/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin/arm-eabi-addr2line -f -e $GAIA_ROOT/out/target/product/$GAIA_PROD/symbols/system/lib/libandroidregex.so 00003e10
+
+GAIA_LOG=
+GAIA_LOG_SPECIFIED="no"
+GAIA_ROOT="`pwd`"
+GAIA_PROD="songshan"
+
+while getopts "d:p:f:" name
+do
+	case $name in
+	d)
+		if [ "x$OPTARG" != "x" ] ; then
+			GAIA_ROOT="$OPTARG"
+		fi
+		;;
+	p)
+		if [ "x$OPTARG" != "x" ] ; then
+			GAIA_PROD="$OPTARG"
+		fi
+		;;
+	f)
+		GAIA_LOG_SPECIFIED="yes"
+		if [ "x$OPTARG" != "x" ] ; then
+			GAIA_LOG="$OPTARG"
+		fi
+		;;
+	*)
+		echo "Usage: $0: [-d <gaia dir name>] [-p <product name>] [-f <log file name>]"
+		exit 0
+		;;
+	esac
+done
+
+
+echo "GAIA_ROOT=$GAIA_ROOT"
+echo "GAIA_PROD=$GAIA_PROD"
+if [ "x$GAIA_LOG_SPECIFIED" = "xyes" ] ; then
+	echo "GAIA_LOG=$GAIA_LOG"
+fi
+
+if [ ! -x "$GAIA_ROOT/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin/arm-eabi-addr2line" ] ; then
+	echo "tool 'arm-eabi-addr2line' not found:"
+	echo "'$GAIA_ROOT/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin/arm-eabi-addr2line' is not an executable"
+	echo "exiting..."
+	exit
+fi
+
+if [ ! -d "$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols" ] ; then
+	echo "symbol file directory not found:"
+	echo "'$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols' is not a directory"
+	echo "exiting..."
+	exit
+fi
+
+if [ "x$GAIA_LOG_SPECIFIED" = "xyes" ] ; then
+	if [ ! -f "$GAIA_LOG" ] ; then
+		echo "log file '$GAIA_LOG' not found"
+		echo "exiting..."
+		exit
+	else
+		echo
+		
+		LINES=`grep -e 'I\/DEBUG.*#[0-9][0-9]\s*pc\s*[0-9a-fA-F]\{8,8\}' -e 'D\/RefBase.*#[0-9][0-9]\s*pc\s*[0-9a-fA-F]\{8,8\}' "$GAIA_LOG" | sed 's/\r//g'`
+		echo -e "Call Stack:\n$LINES\n"
+		echo -e "$LINES" | while read -r LINE_READ
+		do
+			SYMBOL_FILE=`echo "$LINE_READ" | sed 's/\(.*\)\(#[0-9][0-9]\)\s*pc\s*\([0-9a-fA-F]\{,8\}\)\s*\(.*\)/\4/g'`
+			SYMBOL_ADDR=`echo "$LINE_READ" | sed 's/\(.*\)\(#[0-9][0-9]\)\s*pc\s*\([0-9a-fA-F]\{,8\}\)\s*\(.*\)/\3/g'`
+			#echo "$SYMBOL_FILE"
+			#echo "$SYMBOL_ADDR"
+			#echo "$GAIA_ROOT/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin/arm-eabi-addr2line -f -e $GAIA_ROOT/out/target/product/$GAIA_PROD/symbols/$SYMBOL_FILE $SYMBOL_ADDR"
+			
+			#symfile="$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE"
+			#echo "$symfile"
+			#$GAIA_ROOT/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin/arm-eabi-addr2line -f -e "$symfile" "$SYMBOL_ADDR"
+			
+			$GAIA_ROOT/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin/arm-eabi-addr2line -f -e "$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE" "$SYMBOL_ADDR"
+			echo
+		done
+	fi
+else
+	echo
+	
+	while read -r LINE_READ
+	do
+		if echo "$LINE_READ" | grep -e 'I\/DEBUG.*#[0-9][0-9]\s*pc\s*[0-9a-fA-F]\{8,8\}' > /dev/null 2>&1 ; then
+			SYMBOL_FILE=`echo "$LINE_READ" | sed 's/\(.*\)\(#[0-9][0-9]\)\s*pc\s*\([0-9a-fA-F]\{,8\}\)\s*\(.*\)/\4/g'`
+			SYMBOL_ADDR=`echo "$LINE_READ" | sed 's/\(.*\)\(#[0-9][0-9]\)\s*pc\s*\([0-9a-fA-F]\{,8\}\)\s*\(.*\)/\3/g'`
+			#echo "$GAIA_ROOT/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin/arm-eabi-addr2line -f -e $GAIA_ROOT/out/target/product/$GAIA_PROD/symbols/$SYMBOL_FILE $SYMBOL_ADDR"
+			$GAIA_ROOT/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin/arm-eabi-addr2line -f -e "$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE" "$SYMBOL_ADDR"
+			echo
+		fi
+	done
+fi

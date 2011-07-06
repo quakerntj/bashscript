@@ -1,0 +1,7 @@
+#!/bin/bash
+ga
+cd out/target/product/cardhu/system
+if [ $# -gt 1 ]; then
+	echo $@
+	$@
+fi

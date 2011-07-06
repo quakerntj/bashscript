@@ -1,0 +1,47 @@
+#!/bin/bash
+pushd . >/dev/null
+#I dont need croot any more.
+#type croot &>/dev/null && croot &>/dev/null
+#if [ $? -ne 0 ]; then
+
+
+	# find local gaia path
+	while [ $PWD != "/" ];
+	do
+		if [ -d "arch/arm/mach-tegra" -o -d "kernel/arch/arm/mach-tegra" ]; then
+			if [ -d "../kernel" ]; then
+				cd ..
+			fi
+			break
+		fi
+		cd ..
+	done
+	if [ -d "arch/arm/mach-tegra" -o -d "kernel/arch/arm/mach-tegra" ]; then
+		export QUATTRO_PATH=$PWD
+
+		echo "found"
+		echo "QUATTRO path: $QUATTRO_PATH"
+		if [ $# -gt 1 ]; then
+			echo $@
+			$@
+		fi
+	else
+		QPATH="/home/quaker/workspace/device"
+		if [ -d $QPATH ]; then
+			cd $QPATH
+
+			export QUATTRO_PATH=$QPATH
+			QPATH=
+
+			echo "use default"
+			echo "QUATTRO path: $QUATTRO_PATH"
+			if [ $# -gt 1 ]; then
+				echo $@
+				$@
+			fi
+		else
+			popd > /dev/null
+		fi
+	fi
+
+#fi

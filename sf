@@ -1,0 +1,99 @@
+#!/bin/bash
+#Search File then Edit it
+#	Quaker NTj Chung
+#		2010/08/13
+
+TMP=~/.searchfile
+TMP2=~/.searchfile2
+
+if [ -f $TMP2 ]; then
+	rm $TMP2
+fi
+
+EDITOR=$3
+if [ $# -lt 2 ]; then
+	echo "		Search File then Edit it"
+	echo "command:	sf <filename> <grep_filter> [editor]"
+	echo "find files (default)"
+	echo "find directions (if editor = cd)"
+	return 0
+fi
+
+locate $1 | grep $2 > $TMP
+
+if [ "$3" == "cd" ]; then
+	while read FILE_PATH_NAME
+	do
+		if [ -d $FILE_PATH_NAME ]; then
+			echo $FILE_PATH_NAME >>$TMP2
+		fi
+	done < $TMP
+	TMP=$TMP2
+	grep --color=auto -n / $TMP
+else
+	while read FILE_PATH_NAME
+	do
+		if [ -f $FILE_PATH_NAME ]; then
+			echo $FILE_PATH_NAME >>$TMP2
+		fi
+	done < $TMP
+	TMP=$TMP2
+	grep --color=auto -n $1 $TMP
+fi
+
+#INDEX=0
+#PAGE=30
+#while read FILE_PATH_NAME
+#do
+#	grep $1 $INDEX $FILE_PATH_NAME
+#	INDEX=$(($INDEX+1));
+#	if [ "$INDEX" -gt "$PAGE" ]; then
+#		PAGE=$(($PAGE+30))
+#	fi
+#done < $TMP
+
+if [ "$#" -le "2" ]; then
+	return 0;
+fi
+
+if  [ -n "$4" ]; then
+	[ $4 -eq 0 ] 2>/dev/null
+	if [ $? -ge 2 ]; then
+		echo "\"$4\" not a number"
+		return 0
+	fi
+	WHO=$4
+else
+	echo "Enter the index number,"
+	read -p "	Edit who?  " WHO
+fi
+
+[ $WHO -eq 0 ] 2>/dev/null
+# if the error, $?, is not 0 or 1, $WHO is not a number
+if [ $? -ge 2 ]; then
+	#not number
+	return 0
+fi
+
+#note that grep serial number start from 1
+INDEX=1
+while read FILE_PATH_NAME
+do
+	if [ "$INDEX" -eq "$WHO" ]; then
+		FILE_EDIT=$FILE_PATH_NAME
+	fi
+	INDEX=$(($INDEX+1));
+done < $TMP
+
+if [ "$FILE_EDIT" == "" ]; then
+	return 0;
+fi
+
+echo "$EDITOR $FILE_EDIT"
+if [ "$3" == "cd" ]; then
+	pushd .
+	cd $FILE_EDIT
+else
+	$EDITOR $FILE_EDIT
+fi
+

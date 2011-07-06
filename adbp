@@ -1,0 +1,62 @@
+#!/bin/bash
+
+OUT=$GOUT_SYSTEM
+
+if [ $# -lt 1 ]; then
+	echo "	adbp [-e] [ts] <lib|bin|pkg|mod> <filename>"
+	echo "		ex: adbp lib evas"
+	echo "		ex: adbp bin execme"
+	echo "		ex: adbp pkg app_ex1"
+	exit 0
+fi
+
+if [ "$1" == "e" ]; then
+	gedit ~/bashscript/adbp &
+	exit 0
+fi
+
+if [ "$1" == "-e" ]; then
+	EMU="-e"
+	shift
+fi
+
+if [ "$1" == "ts" ]; then
+	OUT=$GOUT_SYSTEM2
+	shift
+fi
+
+
+adb $EMU "wait-for-device"
+
+case $1 in
+	"lib")
+		echo From: $OUT/lib/lib$2.so;
+		echo  To : system/lib;
+		#adb $EMU push $OUT/lib/lib$2.so system/lib;;
+		echo $OUT/lib/lib$2.so | awk '
+{
+	split( $0, A, " " )
+	for(i = 1 ; i <= NF ; i++) {
+		print "echo \"adb " emu " push " A[i] " system/lib\""
+		print "adb " emu " push " A[i] " system/lib"
+	}
+}
+' > /tmp/push_list;
+		source /tmp/push_list;
+		rm /tmp/push_list;;
+	"bin")
+		echo From: $OUT/bin/$2;
+		echo  To : system/bin;
+		adb $EMU push $OUT/bin/$2 system/bin;;
+	"mod")
+		echo From: $OUT/lib/evas/modules/engines/$2/$3;
+		echo  To : system/lib/evas/modules/engines/$2;
+		adb $EMU push $OUT/lib/evas/modules/engines/$2/$3 system/lib/evas/modules/engines/$2;;
+	"pkg")
+		echo From: $OUT/app/$2.apk;
+		echo  To : system/app;
+		adb $EMU push $OUT/app/$2.apk system/app;;
+	*)
+		echo adb push $OUT/$2/$3 system/$2;
+		adb push $OUT/$2/$3 system/$2;;
+esac

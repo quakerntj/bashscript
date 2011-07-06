@@ -1,0 +1,1 @@
+adbp lib res && adbp bin dt && adbs dt

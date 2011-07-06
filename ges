@@ -1,0 +1,35 @@
+#!/bin/bash
+pushd . > /dev/null
+# find local gaia path
+while [ $PWD != "/" ];
+do
+	if [ -f "build/envsetup.sh" ]; then
+		break
+	fi
+	cd ..
+done
+if [ -f "build/envsetup.sh" ]; then
+	GAIA_PATH=$PWD
+	echo "Gaia path: $GAIA_PATH"
+else
+	if [ -d /home/quaker/workspace/gaia/common/build/envsetup.sh ]; then
+		cd /home/quaker/workspace/gaia/common
+	elif [ -d /home/quaker/workspace/gaia/build/envsetup.sh ]; then
+		cd /home/quaker/workspace/gaia/
+	fi
+fi
+
+source build/envsetup.sh
+
+if [ "$1" == "l" ]; then
+	if [ -d "/tmp/glink" ]; then
+		echo "rm /tmp/glink"
+		rm /tmp/glink
+	fi
+	echo "ln -s $PWD /tmp/glink"
+	ln -s $PWD /tmp/glink
+else
+	echo "use '. ges l' to make shortcut to gaia"
+fi
+popd > /dev/null
+

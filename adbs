@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ "$1" == "-e" ]; then
+	EMU="-e"
+	shift
+fi
+echo adb $EMU shell $@
+adb $EMU "wait-for-device"
+adb $EMU shell $@

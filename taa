@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ -f Android.mk ]; then
+	echo "--- before ---"
+	grep --color=auto -n "\$(GEN) *\: *.com.htc.resources" Android.mk
+	grep --color=auto -n "\$(GEN) *\: *com.htc.resources" Android.mk > /dev/null
+	if [ $? -eq 0 ]; then
+		echo ""
+		echo "mark com.htc.resources in Android.mk"
+		echo ""
+		sed -i 's/\$(GEN) *\: *com.htc.resources/\$(GEN)\:#com.htc.resources/g' Android.mk
+	else
+		echo ""
+		echo "unmark com.htc.resources in Android.mk"
+		echo ""
+		sed -i 's/\$(GEN) *\:#com.htc.resources/\$(GEN)\: com.htc.resources/g' Android.mk
+	fi
+	echo "--- after ---"
+	grep --color=auto -n "\$(GEN) *\: *.com.htc.resources" Android.mk
+fi

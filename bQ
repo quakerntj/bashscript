@@ -1,0 +1,274 @@
+#!/bin/bash
+#default
+INTERNAL_VALID_VARIANTS="eng"
+TARGET_PRODUCT="cardhu"
+
+MAKETHREAD=""
+ERR=0
+#please enter abslute path
+#To the best, edit .bashrc expand the both lines.
+GAIA_PATH="/home/quaker/workspace/quattro"
+#if [ -f /tmp/glink/build/envsetup.sh ]; then
+#	GAIA_PATH="/tmp/glink"
+#fi
+
+pushd . >/dev/null
+pushd . >/dev/null
+
+# find local gaia path
+while [ $PWD != "/" ];
+do
+	if [ -f "build/envsetup.sh" ]; then
+		break
+	fi
+	cd ..
+done
+if [ -f "build/envsetup.sh" ]; then
+	GAIA_PATH=$PWD
+	echo "Gaia path: $GAIA_PATH"
+fi
+GLOG="$GAIA_PATH/out/bG_L.log"
+GERR="$GAIA_PATH/out/bG_E.log"
+GWAR="$GAIA_PATH/out/bG_W.log"
+if [ ! -d $GAIA_PATH/out ]; then
+	mkdir -p $GAIA_PATH/out
+fi
+
+v1=$1
+v2=$2
+v3=$3
+v4=$4
+
+for a in $1 $2 $3 $4 $5 $6
+do
+	case $a in
+	"e")
+		gedit ~/bashscript/bG &
+		exit 0;;
+	"edit")
+		gedit ~/bashscript/bG &
+		exit 0;;
+	"editme")
+		gedit ~/bashscript/bG &
+		exit 0;;
+	"vlog")
+		gvim $GLOG
+		exit 0;;
+	"log")
+		grep -e "No rule" -e " error" -e " Err" -e "\*\*\*" \
+			-e "undefined reference" -e "定義" -e "參考" -e "找不到" \
+			-e "note:" $GLOG | awk -v gaia_path="$GAIA_PATH" '
+			{
+				where = match($0, /^frameworks/)
+				if (where != 0)
+					print gaia_path "/" $0
+				else
+					print $0
+			}
+			'> $GERR
+		grep -A 1 -e "will abort" -e "POD" -e "redefine" -e "initial" \
+			-e "_dynamic" -e "#endif" -e "#if" -e "comparison between" \
+		$GLOG | awk -v gaia_path="$GAIA_PATH" '
+		{
+			where = match($0, /^frameworks/)
+			if (where != 0) {
+				print gaia_path "/" $0;
+			}
+			where = match($0, /^packages/)
+			if (where != 0)
+				print gaia_path "/" $0;
+			else
+				print $0;
+		}
+		'> $GWAR
+		gedit $GLOG &
+		exit 0;;
+	"war")
+		gedit $GWAR &
+		exit 0;;
+	"verr")
+		gvim $GERR
+		exit 0;;
+	"err")
+		gedit $GERR &
+		exit 0;;
+	"mod")
+		v7=$v3;;
+	-j*)
+		echo "** $a **";
+		MAKETHREAD=$a;;
+	"mm")
+		v3="mm";
+		MAKETHREAD="-j3";;
+	"mmm")
+		v3="mmm";
+		MAKETHREAD="-j3";;
+	"dry")
+		echo "*** Dry mode ***";
+		v4="dry";;
+	esac
+done
+
+#no used
+if [ "$1" == "no used" ]; then
+	echo "buildGaia [ss|ts [c|e|mod MOD]]  [mm] [-jXX]"
+	echo "buildGaia [log|vlog]"
+	echo "	ss: songshan	ts:  tianshan"
+	echo "	c:  clean	e:   eng (default)"
+	echo "  mod: MOD is your specified module"
+	echo "	mm: mm  	dry: dry mode"
+	echo "	-jXX: XX is number of threads"
+	echo "  log: use gedit	vlog: use gvim"
+	read -p "Run default: buildGaia ss u (Y/N): " yn
+	[ "$yn" != "Y" -a "$yn" != "y" ] && exit 0
+	v1="ss"
+	v2="ts"
+	v3=""
+fi
+
+case $v1 in
+	"ss")
+		echo "songshan";
+		export TARGET_PRODUCT=htc_songshan;
+		export PRODUCT=songshan;;
+
+	"ts")
+		echo "tianshan";
+		export TARGET_PRODUCT=htc_tianshan;
+		export PRODUCT=tianshan;;
+
+	"br")
+		echo "bravo";
+		export TARGET_PRODUCT=htc_bravo;;
+
+	* ) 
+		echo "songshan";
+		export TARGET_PRODUCT=htc_songshan;;
+esac
+
+case $v2 in
+	"c" | "clean" )
+		echo "clean";
+		export INTERNAL_VALID_VARIANTS="easy_clean";;
+
+	"fc" | "force clean" )
+		echo "force clean";
+		export INTERNAL_VALID_VARIANTS="clean";;
+
+	"e" | "eng" )
+		echo "eng";
+		[ "$MAKETHREAD" == "" ] && export MAKETHREAD="-j10";
+		export INTERNAL_VALID_VARIANTS="eng";;
+
+	"mod" )
+		echo "mod=$v7";
+		export INTERNAL_VALID_VARIANTS=$v7;;
+
+	* ) 
+		echo "eng";
+		[ "$MAKETHREAD" == "" ] && export MAKETHREAD="-j10";
+		export INTERNAL_VALID_VARIANTS="eng";;
+esac
+
+if [ $INTERNAL_VALID_VARIANTS == "easy_clean" ]; then
+	if [ -d $GAIA_PATH/out/target/product/$PRODUCT ]; then
+		echo "rm -r $GAIA_PATH/out/target/product/$PRODUCT"
+		cd "$GAIA_PATH/out/target/product/"
+		rm -r $PRODUCT
+	else
+		echo "DIR: $GAIA_PATH/out/target/product/$PRODUCT not found"
+	fi
+	popd >/dev/null
+elif [ $ERR == 0 ]; then
+	START_TIME=
+	END_TIME=
+	cd $GAIA_PATH
+	. build/envsetup.sh
+	kernel_build.sh
+fi
+
+# no used code
+if [ 0 ]; then
+
+	echo ""
+	BUILDERR=0;
+	if [ "$v3" == "mm" -o "$v3" == "mmm" ]; then
+		popd >/dev/null
+		echo "$PWD/$v3 $MAKETHREAD PRODUCT-$TARGET_PRODUCT-$INTERNAL_VALID_VARIANTS  2>&1 | tee $GLOG"
+		START_TIME=`date +%y/%m/%d-%H:%M`
+		if [ "$v4" != "dry" ]; then
+			$v3 $MAKETHREAD "PRODUCT-$TARGET_PRODUCT-$INTERNAL_VALID_VARIANTS" 2>&1 | tee $GLOG
+		fi
+		END_TIME=`date +%y/%m/%d-%H:%M`
+		
+		echo start date: $START_TIME >> $GLOG
+		echo end date: $END_TIME >> $GLOG
+	else
+		echo "make $MAKETHREAD PRODUCT-$TARGET_PRODUCT-$INTERNAL_VALID_VARIANTS 2>&1 | tee $GLOG"
+		START_TIME=`date +%y/%m/%d-%H:%M`
+		if [ "$v4" != "dry" ]; then
+			make $MAKETHREAD "PRODUCT-$TARGET_PRODUCT-$INTERNAL_VALID_VARIANTS" 2>&1 | tee $GLOG
+			popd >/dev/null
+		fi
+		END_TIME=`date +%y/%m/%d-%H:%M`
+		echo start date: $START_TIME >> $GLOG
+		echo end date: $END_TIME >> $GLOG
+	fi
+
+	grep -A 3 -B 3 -e "No rule" -e " error" -e " Err" -e "\*\*\*" \
+		-e "undefined reference" -e "定義" -e "參考" -e "找不到" \
+		-e "will abort"\
+		$GLOG | awk -v gaia_path="$GAIA_PATH" '
+		{
+			where = match($0, /^frameworks/)
+			if (where != 0) {
+				print gaia_path "/" $0;
+			}
+			where = match($0, /^packages/)
+			if (where != 0)
+				print gaia_path "/" $0;
+			else
+				print $0;
+		}
+		'> $GERR
+
+	grep -A 3 -B 3 -e "No rule" -e " error" -e " Err" -e "\*\*\*" \
+		-e "undefined reference" -e "定義" -e "參考" -e "找不到" \
+		-e "will abort"\
+		$GLOG | awk -v gaia_path="$GAIA_PATH" '
+		{
+			where = match($0, /^frameworks/)
+			if (where != 0) {
+				print gaia_path "/" $0;
+			}
+			where = match($0, /^packages/)
+			if (where != 0)
+				print gaia_path "/" $0;
+			else
+				print $0;
+		}
+		'> $GERR
+
+	grep -A 1 -e "will abort" -e "POD" -e "redefine" -e "initial" \
+			-e "_dynamic" -e "#endif" -e "#if" -e "comparison between"\
+		$GLOG | awk -v gaia_path="$GAIA_PATH" '
+		{
+			where = match($0, /^frameworks/)
+			if (where != 0) {
+				print gaia_path "/" $0;
+			}
+			where = match($0, /^packages/)
+			if (where != 0)
+				print gaia_path "/" $0;
+			else
+				print $0;
+		}
+		'> $GWAR
+	echo start date: $START_TIME
+	echo end date: $END_TIME
+else
+	echo ""
+	echo "False command.  Do nothing."
+fi
+popd >/dev/null
+

@@ -1,0 +1,11 @@
+#!/bin/bash
+ga
+
+cd packages/apps/HtcAddProgramWidget
+if [ $2 ]; then
+	cd src/com/htc/AddProgramWidget
+fi
+if [ $# -gt 1 ]; then
+	echo $@
+	$@
+fi

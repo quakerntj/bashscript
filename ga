@@ -1,0 +1,32 @@
+#!/bin/bash
+pushd . >/dev/null
+#I dont need croot any more.
+#type croot &>/dev/null && croot &>/dev/null
+#if [ $? -ne 0 ]; then
+
+	GAIA_PATH="/home/quaker/workspace/gaia"
+	# find local gaia path
+	while [ $PWD != "/" ];
+	do
+		if [ -f "build/envsetup.sh" ]; then
+			break
+		fi
+		cd ..
+	done
+	if [ -f "build/envsetup.sh" ]; then
+		GAIA_PATH=$PWD
+		cd $GAIA_PATH
+	else
+		cd $GAIA_PATH
+		if [ -f "common/build/envsetup.sh" ]; then
+			GAIA_PATH="$GAIA_PATH/common"
+			cd common
+		fi
+	fi
+	echo "Gaia path: $GAIA_PATH"
+
+	if [ $# -gt 1 ]; then
+		echo $@
+		$@
+	fi
+#fi

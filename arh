@@ -1,0 +1,15 @@
+#!/bin/bash
+qa
+
+if [ -d arch/arm/mach-tegra ]; then
+	cd arch/arm/mach-tegra;
+else
+	if [ -d kernel/arch/arm/mach-tegra ]; then
+		cd kernel/arch/arm/mach-tegra;
+	fi
+fi
+
+if [ $# -gt 1 ]; then
+	echo $@
+	$@
+fi

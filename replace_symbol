@@ -1,0 +1,20 @@
+type croot &>/dev/null
+if [ $? -eq 0 ]; then
+	croot
+	cd framework/base/include/binder
+
+	echo get binder file names
+	ls -1 > /tmp/u2b1
+
+	echo collect who include utils/binder
+	awk '{print "hgrep -c \"utils\/" $0 "\""}' /tmp/do1 > /tmp/u2b2
+	awk '{print "cgrep -c \"utils\/" $0 "\""}' /tmp/do1 >> /tmp/u2b2
+	
+	source /tmp/u2b2 > 
+	
+	echo trim hgrep tail
+	sed 's/utils\/
+	awk '{print "sed \'\/
+else
+	echo Please invoke build/envsetup.sh
+fi

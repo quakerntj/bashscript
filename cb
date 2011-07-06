@@ -1,0 +1,80 @@
+#!/bin/bash
+cd $GAIA_PATH
+
+ARCHIVE="out/backup.tar"
+
+if [ "$1" == "e" ]; then
+	gedit ~/bashscript/cb &
+	exit 0
+fi
+
+
+# Extract
+if [ "$1" == "x" ]; then
+	XP="-C $GAIA_PATH"
+	if [ $# == 2 ]; then
+		XP="-C $2"
+	fi
+	
+	tar -vtf $ARCHIVE $XP
+	echo ""
+	echo "Command: tar -xf $ARCHIVE $XP"
+	echo ""
+	read -p "	Are you sure? This would overwrite files: [y/n] " yesorno
+	
+	if [ "$yesorno" != "y" ]; then
+		echo "do nothing"
+		exit 0
+	fi
+
+	tar -xf $ARCHIVE $XP
+	echo "Done"
+	exit 0
+fi
+
+if [ "$1" == "m" -o "$1" == "merge" ]; then
+	if [ $# -eq 3 ]; then
+		diff -r "$2" "$3" -q | grep -v -e 只在 | awk '{FS=" "}{ print "read -p \"do merge:\n" $2 "\n" $4 "\nPress Enter\"\nmeld " $2 " " $4 }' > /tmp/domerge
+		. /tmp/domerge
+		rm /tmp/domerge
+	else
+		echo "cb m <path_source> <path_distination>"
+		exit -1
+	fi
+	exit 0
+fi
+
+# Compare Differ
+if [ "$1" == "c" -o "$1" == "d" ]; then
+	tar -f $ARCHIVE --diff
+	exit 0
+fi
+
+
+# Compress
+if [ -e $ARCHIVE ]; then
+	read -p "$ARCHIVE is exist, \"rm\" old file? [y/n] " yesorno
+
+	if [ "$yesorno" != "y" ]; then
+		echo "do nothing"
+		exit 0
+	fi
+	
+	echo "rm $ARCHIVE"
+	rm $ARCHIVE
+fi
+
+if [ ! -e out ]; then
+	echo "mkdir out"
+	mkdir out
+fi
+
+echo "git checkout | awk \'{ {shift; print(\"tar -rf $ARCHIVE \" $2)} }\' > __backup.sh"
+git checkout | awk '{ {shift; print("tar -rf $ARCHIVE " $2)} }' > __backup.sh
+grep --color=auto __backup.sh -e /
+
+echo "source __backup.sh"
+source __backup.sh
+
+echo "rm __backup.sh"
+rm __backup.sh
