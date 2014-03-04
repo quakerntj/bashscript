@@ -1,0 +1,19 @@
+#!/bin/bash
+pipe=/tmp/pipe.gaia
+
+if [[ ! -p $pipe ]]; then
+     echo "Pipe server not running"
+else
+	if [[ "$1" ]]; then
+		echo "export CLIENT=$(tty)" > $pipe
+		echo -en "$(tty) send \"$COLOR_BG_BLUE"
+		echo -En "$@"
+		echo -e "$COLOR_BG_DEFAULT\" to pipe server"
+		echo -E " $@" > $pipe
+		# add ";" for sequence command
+	else
+		echo -e "$$ send \"$COLOR_BG_BLUEHello$COLOR_BG_DEFAULT\" to pipe server"
+		echo "usage: picl <cmd> <args>"
+		echo "echo Hello from $$" > $pipe
+	fi
+fi

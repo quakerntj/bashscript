@@ -1,0 +1,87 @@
+#!/bin/bash
+
+LOP_BEGIN=""
+LOP_LOOP=-1
+LOP_MIDDLE=""
+LOP_SLEEP=0
+LOP_END=""
+LOP_ERROR_EXIT=1
+
+while getopts "b:e:s:l:m:E" name
+do
+    case $name in
+    b)
+	    if [ x"$OPTARG" != "x" ] ; then
+		    LOP_BEGIN="$OPTARG"
+	    fi
+	    ;;
+    e)
+	    if [ x"$OPTARG" != "x" ] ; then
+		    LOP_END="$OPTARG"
+	    fi
+	    ;;
+    s)
+	    if [ x"$OPTARG" != "x" ] ; then
+		    LOP_SLEEP="$OPTARG"
+	    fi
+	    ;;
+	l)
+	    if [ x"$OPTARG" != "x" ] ; then
+	        LOP_LOOP="$OPTARG"
+	    fi
+	    ;;
+	m)
+	    if [ x"$OPTARG" != "x" ] ; then
+	        LOP_MIDDLE="$OPTARG"
+	    fi
+	    ;;
+	E)
+	    LOP_ERROR_EXIT=0;;
+    *)
+	    echo "Usage: lop [-bmesl]"
+	    echo "  -b <do at beginning>"
+	    echo "  -m <do at loop> must set it"
+	    echo "  -e <endding> no defualt"
+	    echo "  -s <sleepSecond> default 0"
+	    echo "  -l <loop times> default infinite"
+	    echo "  -E ignore errors.  default not to ignore"
+	    exit 0
+	    ;;
+    esac
+done
+
+echo =================
+echo B $LOP_BEGIN
+echo L $LOP_LOOP
+echo M $LOP_MIDDLE
+echo S $LOP_SLEEP
+echo E $LOP_END
+echo =================
+
+if [ "$LOP_MIDDLE" == "" ]; then
+    echo Must set middle operation.
+    exit -1
+fi
+
+date
+$LOP_BEGIN
+
+while [ $LOP_LOOP -ne 0 ] ;
+do
+    echo -e "\033[44mLoop: $LOP_LOOP\033[0m"
+    LOP_LOOP=`expr $LOP_LOOP - 1`
+    $LOP_MIDDLE
+    LOP_ERROS_NUMBER=$?
+    if [[ $LOP_ERROS_NUMBER -ne 0 && $LOP_ERROR_EXIT -ne 0 ]] ; then
+        echo -e "\033[44mError: Exit loop\033[0m"
+        $LOP_END
+        date
+        exit -1
+    fi
+    sleep $LOP_SLEEP
+done
+
+$LOP_END
+date
+echo =================
+

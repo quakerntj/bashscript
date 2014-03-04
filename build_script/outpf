@@ -1,0 +1,48 @@
+#!/bin/bash
+function outpf_usage()
+{
+	echo "outpf manager the 'out' and '.ccache' folder"
+	echo "Change to certen profile by run"
+	echo "	outpf <profile target name>"
+	echo "	outpf <profile original name> <profile target name>"
+	echo "Profiles"
+	for OPT in $OUT_PROFILE_LIST
+	do
+		echo "	$OPT"
+	done
+}
+
+OUT_PROFILE_ERROR=
+OUT_PROFILE_TARGET=
+OUT_PROFILE_LIST="main tvos emulator"
+#if [ "$TOP" == "" ]; then
+#	outpf_usage
+#	echo "Error: no \$TOP"
+#	OUT_PROFILE_ERROR=1
+#fi
+if [ $# -ne 1 -a $# -ne 2 ]; then
+	outpf_usage
+	echo "Syntax error"
+	OUT_PROFILE_ERROR=1
+fi
+
+OUT_PROFILE_ERROR=1
+if [ $OUT_PROFILE_ERROR -eq 0 ] ; then
+	for OPT in $OUT_PROFILE_LIST
+	do
+		if [[ "$OPT" == "$1" ]] ; then
+			OUT_PROFILE_TARGET="$OPT"
+			break
+		fi
+	done
+
+	if [[ -d $TOP/out ]] ; then
+		if [[ -f $TOP/out/OUTPF_BUILD ]] ; then
+			echo
+		fi
+	else
+		if [[ -d "$TOP/out_$OUT_PROFILE_TARGET" ]] ; then
+			echo 
+		fi
+	fi
+fi

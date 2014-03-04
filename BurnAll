@@ -1,44 +1,9 @@
 #!/bin/bash
-# find local gaia path
-while [ $PWD != "/" ];
-do
-	if [ -f "build/envsetup.sh" ]; then
-		break
-	fi
-	cd ..
-done
-if [ -f "build/envsetup.sh" ]; then
-	QUATTRO_PATH=$PWD
-	echo "Quattro path: $QUATTRO_PATH"
-else
-	QUATTRO_PATH=~/workspace/quattro
+type flash_image > /dev/null
+if [ "$?"=="1" ]; then
+	cd ~/workspace/device
+	source ges
+	source setbuildenv 6
 fi
 
-
-if [ -f "/home/quaker/workspace/android_tools/nvflash" ]; then
-	#must use this, because the nvflash we build cant work porperly.
-	NVFLASH_PATH=/home/quaker/workspace/android_tools
-else
-	echo "WARN use a nvflash tool which is weak"
-	NVFLASH_PATH=$QUATTRO_PATH/out/host/linux-x86/bin
-fi
-
-PRODUCT=cardhu
-
-IMG_PATH=$QUATTRO_PATH/out/target/product/$PRODUCT
-if [ -d "$1" ]; then
-	IMG_PATH=$1
-	shift
-fi
-echo "Burn path = $IMG_PATH"
-pushd . > /dev/null
-cd $IMG_PATH
-pwd
-echo "$NVFLASH_PATH/nvflash --bct flash.bct --setbct --odmdata 0x80080105 --configfile flash.cfg --create --bl bootloader.bin --go"
-if [ "$1" == "k" ]; then
-	$NVFLASH_PATH/nvflash --bct flash.bct --setbct --odmdata 0x80080105 --configfile flash_konly.cfg --create --bl bootloader.bin --go
-else
-	$NVFLASH_PATH/nvflash --bct flash.bct --setbct --odmdata 0x80080105 --configfile flash.cfg --create --bl bootloader.bin --go
-fi
-popd > /dev/null
-
+flash_image

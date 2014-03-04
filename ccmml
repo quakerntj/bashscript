@@ -1,0 +1,37 @@
+#!/bin/bash
+#clear screen
+if [ "$PWD" != "`readlink -f $TOP`" ]; then
+echo -e '\0033\0143'
+
+OUT_PATH="${TOP}/out"
+
+if [ ! -d $OUT_PATH ]; then
+	mkdir $OUT_PATH
+fi
+
+
+cp $OUT_PATH/bG_L.log $OUT_PATH/bG_L.log.old
+echo_bg_blue "source ~/bashscript/ccmm $@ 2>&1 | tee $OUT_PATH/bG_L.log"
+source ~/bashscript/ccmm $@ 2>&1 | tee $OUT_PATH/bG_L.log.tmp
+cp $OUT_PATH/bG_L.log.tmp $OUT_PATH/bG_L.log
+rm $OUT_PATH/bG_L.log.tmp
+echo ===========================================
+echo = = = = = = = = = = = = = = = = = = = = = =
+echo ===========================================
+
+grep -A2 -B1 -e "\*\*\*" -e "error:" $OUT_PATH/bG_L.log > $OUT_PATH/bG_E.log
+grep -A2 -B1 -e "warning:" $OUT_PATH/bG_L.log > $OUT_PATH/bG_W.log
+grep "^Install" $OUT_PATH/bG_L.log > $OUT_PATH/bG_I.log
+
+#cat $OUT_PATH/out/bG_L.log | grep -e "warning:" -e "error:" -e "undefine" -e "Build Time:" | awk -v device_path="/home/quaker/workspace/device" '
+#		{
+#			where = match($0, /^vendor/)
+#			if (where != 0)
+#				print device_path "/" $0
+#			else
+#				print $0
+#		}'
+
+else
+echo "Don't do mm at root folder"
+fi

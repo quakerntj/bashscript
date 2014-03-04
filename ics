@@ -3,10 +3,6 @@ pushd . >/dev/null
 #I dont need croot any more.
 #type croot &>/dev/null && croot &>/dev/null
 #if [ $? -ne 0 ]; then
-if [ -f $QA_TOP/build/envsetup.sh ]; then
-    #echo QA_TOP=$QA_TOP
-    cd $QA_TOP
-else
 	# find local gaia path
 	while [ $PWD != "/" ];
 	do
@@ -19,26 +15,24 @@ else
 		cd ..
 	done
 	if [ -d "arch/arm/mach-tegra" -o -d "kernel/arch/arm/mach-tegra" ]; then
-		export QPATH=$PWD
-		popd > /dev/null
-		pushd . > /dev/null
-		cd $QPATH
+		export QUATTRO_PATH=$PWD
+
 		echo "found"
-		echo "TOP path: $QPATH"
-			QPATH=
+		echo "QUATTRO path: $QUATTRO_PATH"
 		if [ $# -gt 1 ]; then
 			echo $@
 			$@
 		fi
 	else
-		popd > /dev/null
-		pushd . > /dev/null
-		QPATH="/home/quaker/w/device"
+		QPATH="/home/quaker/workspace/device"
 		if [ -d $QPATH ]; then
 			cd $QPATH
-			echo "use default"
-			echo "TOP path: $QPATH"
+
+			export QUATTRO_PATH=$QPATH
 			QPATH=
+
+			echo "use default"
+			echo "QUATTRO path: $QUATTRO_PATH"
 			if [ $# -gt 1 ]; then
 				echo $@
 				$@
@@ -47,5 +41,5 @@ else
 			popd > /dev/null
 		fi
 	fi
-fi
+
 #fi

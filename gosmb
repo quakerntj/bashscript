@@ -1,0 +1,16 @@
+#!/bin/bash
+GOSMB_WIN_PATH=`zenity --entry --title "Samba translate" --text "輸入格式: //win_ip/dirname/dirname/filename"`
+if [ "$?" == 0 ]; then
+    #echo $GOSMB_WIN_PATH;
+    GOSMB_REVERT_SLASH=`echo $GOSMB_WIN_PATH | sed 's/\\\\/\//g'`
+    #echo $GOSMB_REVERT_SLASH
+    GOSMB_REMOVE_FIRST_TWO_SLASH=`echo $GOSMB_REVERT_SLASH | sed 's/^\/\///g'`
+    GOSMB_URL="smb://HTCTAIPEI;quaker_chung@$GOSMB_REMOVE_FIRST_TWO_SLASH"
+    echo $GOSMB_URL
+    basename $GOSMB_URL
+    gvfs-mount $GOSMB_URL
+    sleep 3
+    gnome-open `dirname $GOSMB_URL`
+else
+	echo "syntax: gosmb \\\\WINDOWS_SHARE_IP\\DIR[\\DIR][\\FILENAME]"
+fi

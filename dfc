@@ -1,0 +1,20 @@
+#!/bin/bash
+qa
+
+if [ -d arch/arm/configs ]; then
+	cd arch/arm/configs;
+else
+	if [ -d kernel/arch/arm/configs ]; then
+		cd kernel/arch/arm/configs;
+	fi
+fi
+
+if [ $# -eq 1 ]; then
+	echo $1
+	case $1 in
+	"1")
+		gedit tegra_cardhu_android_defconfig;;
+	"2")
+		gedit tegra_cardhu_android_defconfig;;
+	esac
+fi

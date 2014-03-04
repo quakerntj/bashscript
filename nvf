@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ -f ./nvflash ]; then
+	sudo ./nvflash --bct flash.bct --setbct --odmdata 0x40080105 --configfile flash.cfg --create --bl hboot.img --go
+else
+	sudo ~/workspace/android_tools/nvflash --bct flash.bct --setbct --odmdata 0x40080105 --configfile flash.cfg --create --bl hboot.img --go
+fi

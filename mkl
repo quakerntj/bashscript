@@ -1,0 +1,39 @@
+#!/bin/bash
+
+if [ $TOP == "" ]; then
+	source ~/bashscript/qa
+	source build/envsetup.sh
+	choosecombo 1 dlx eng
+	popd > /dev/null
+fi
+
+TIME_BEGIN=$(date)
+OUT_PATH="/home/quaker/workspace/device/out"
+
+if [ ! -d $OUT_PATH ]; then
+	mkdir $OUT_PATH
+fi
+
+echo "build_all_noprebuilt PREBUILT_AP=false $@ 2>&1 | tee $OUT_PATH/bG_L.log"
+echo "Build begin at $TIME_BEGIN"
+make ENABLE_OGRE=false ONLYSDKAP=true ENABLE_ANDROID_RT= ENABLE_WIRELESSDONGLE=false BUILD_WITH_WEBKIT= $@ 2>&1 | tee $OUT_PATH/bG_L.log
+echo "Build Time: $TIME_BEGIN ~ $(date)"
+
+echo ===========================================
+echo = = = = = = = = = = = = = = = = = = = = = =
+echo ===========================================
+
+grep -A2 -B1 -e "\*\*\*" -e "error:" $OUT_PATH/bG_L.log > $OUT_PATH/bG_E.log
+grep -A2 -B1 -e "warning:" $OUT_PATH/bG_L.log > $OUT_PATH/bG_W.log
+grep "^Install" $OUT_PATH/bG_L.log > $OUT_PATH/bG_I.log
+
+#If build all, we don't want to see warning.
+cat $OUT_PATH/bG_L.log | grep -e "error:" -e "undefine" -e "Build Time:" | awk -v device_path="$OUT" '
+		{
+			where = match($0, /^vendor/)
+			if (where != 0)
+				print device_path "/" $0
+			else
+				print $0
+		}' | sed 's/\/home\/quaker\/workspace/~\/w/g' | sed 's/g\/dlx/device/g'
+

@@ -1,0 +1,1 @@
+fastboot flash userdata userdata.img

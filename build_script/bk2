@@ -1,0 +1,15 @@
+#!/bin/bash
+
+source qa
+
+#source setbuildenv `zenity --scale --value 2 --min-value 1 --max-value 7 --step 1 --text "1/QUO_F\n2/QUO_U\n3/cardhu\n4/enterprise"`
+
+build_all_noprebuilt -j3 2>&1 | tee out/bG_L.log
+
+grep -A2 -B1 -e "error:" out/bG_L.log > out/bG_E.log
+grep -A2 -B1 -e "warning:" out/bG_L.log > out/bG_W.log
+grep -e "^Install" out/bG_L.log > out/bG_I.log
+
+date
+
+popd > /dev/null

@@ -1,0 +1,4 @@
+#!/bin/bash
+build_status running
+$@
+build_status stoped

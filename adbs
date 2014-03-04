@@ -3,6 +3,18 @@ if [ "$1" == "-e" ]; then
 	EMU="-e"
 	shift
 fi
+
+# while can do a return by break
+while [ 1 ];
+do
+if [ "$1" == "kill" -a $# -eq 2 ]; then
+    adb $EMU shell kill $(adb shell $2 | grep $2 | sed 's/ \+/ /g' | cut -f 2 -d ' ')
+    break;
+fi
+
 echo adb $EMU shell $@
 adb $EMU "wait-for-device"
 adb $EMU shell $@
+
+break;
+done

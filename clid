@@ -1,0 +1,116 @@
+#!/bin/bash
+function getGerritUserName {
+    sed -e "s/.*ssh:\/\/\([a-zA-Z0-9_\.]*\)@.*/\1/;tx;d;:x" .repo/manifests.git/config
+}
+
+function getAllHash
+{
+    while read line
+    do
+        if [ "$line" != "" -a -d "$line" ]; then
+            pushd . > /dev/null
+            cd $line
+            LOGLINE=`git log --pretty=format:'%cd %H' --date=raw -1 -n 1`
+            LOGGERRIT=`echo $LOGLINE | cut -d " " -f 3`
+            echo "$LOGLINE http://git.htc.com:8081/#/q/$LOGGERRIT,n,z"
+            popd > /dev/null
+        fi
+    done < .repo/project.list
+}
+
+function getAllClid_old
+{
+    for line in $(cat .repo/project.list)
+    do
+        if [ "$line" != "" -a -d "$line" ]; then
+            pushd . > /dev/null
+            cd $line
+            local LOGLINE=`git log --pretty=format:'%cd %H' --date=raw -1 -n 1`
+            local LOGGERRIT=`echo $LOGLINE | cut -d " " -f 3`
+            local CLID=`ssh -p 29419 quaker_chung@git.htc.com "gerrit query --comments $LOGGERRIT" | grep CLId | sed 's/.*(CLId=\([0-9]*\)).*/\1/g'`
+            echo $line $LOGGERRIT $CLID
+            popd > /dev/null
+        fi
+    done
+}
+
+function getClid
+{
+    local LOGGERRIT=`git log --pretty=format:'%H' -n 1`
+    local CLID=`ssh -p 29419 quaker_chung@git.htc.com "gerrit query --comments $LOGGERRIT" | grep CLId | sed 's/.*(CLId=\([0-9]*\)).*/\1/g'`
+    echo $CLID
+}
+
+function getHashClid
+{
+    local CLID=`ssh -p 29419 $GERRIT_USER@git.htc.com "gerrit query --comments $1" | grep CLId | sed 's/.*(CLId=\([0-9]*\)).*/\1/g'`
+    echo $CLID
+}
+
+# Find the first qualified hash.
+function findHashLessThanClid
+{
+    for hashcode in $(git log --pretty=format:'%H')
+    do
+        local RET=$(getHashClid $hashcode)
+        if [ "$RET" != "" ]; then
+            if [ "$RET" -gt "$1" ]; then
+                continue
+            fi
+        else
+            #echo "$hashcode didn't have clid"
+            continue
+        fi
+        echo $hashcode
+        break
+    done
+}
+
+function resetToClid
+{
+    if [ "$1" == "" ]; then
+        echo "Usage: resetToClid <CLID>"
+        return 1
+    fi
+    echo -e "\e[93mWarning! This function may clean all your local commit in current branch.\e[0m"
+    echo "Press any key continue."
+    read
+    echo "Running..."
+    TOP=$(gettop)
+    cd $TOP
+    export GERRIT_USER=$(getGerritUserName)
+    for line in $(cat .repo/project.list)
+    do
+        if [ "$line" != "" -a -d "$line" ]; then
+            pushd . > /dev/null
+            cd $line
+            local RET=$(findHashLessThanClid $1)
+            echo -e "\e[94mgit reset --hard $RET in $line\e[0m"
+            #git reset --hard $RET
+            popd > /dev/null
+        fi
+    done
+}
+
+function getAllClid
+{
+    for line in $(cat .repo/project.list)
+    do
+        if [ "$line" != "" -a -d "$line" ]; then
+            pushd . > /dev/null
+            cd $line
+            CLID=$(getClid)
+            #ignore local commit
+            if [ "$CLID" != "" ]; then
+                echo $CLID $line
+            fi
+            popd > /dev/null
+        fi
+    done
+}
+
+if [ "$1" == "-a" ]; then
+    getAllClid | sort -r
+else
+    getAllClid | sort -r| head
+fi

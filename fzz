@@ -1,0 +1,2 @@
+fastboot flash zimage obj/KERNEL/arch/arm/boot/zImage
+

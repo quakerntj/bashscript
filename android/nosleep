@@ -1,0 +1,1 @@
+adbs "echo main > /sys/power/wake_lock"

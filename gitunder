@@ -1,0 +1,13 @@
+#!/bin/bash
+echo Finding git directories may take time...
+for gitpath in $(find . -wholename ./.repo -prune -o -name .git);
+do
+    echo $gitpath
+    if [ "$gitpath" != "" -a -d "$gitpath" ]; then
+	    pushd . > /dev/null
+	    cd $gitpath/..
+	    pwd
+	    $@
+	    popd > /dev/null
+    fi
+done

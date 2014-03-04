@@ -1,0 +1,44 @@
+#!/bin/bash
+TIME_BEGIN=$(date)
+echo "Build begin at $TIME_BEGIN"
+
+# for show 錯誤 in english
+#export LANG=en_US # this will let static_library.mk build fail
+
+if [ "$TARGET_BUILD_VARIANT" == "" ]; then
+	echo "can't find \$TARGET_BUILD_VARIANT"
+else
+if [ "$TOP" != "" ]; then
+	export USE_CCACHE=1
+	#let each build folder use different .ccache
+	if [ "$TARGET_PRODUCT" != "" ]; then
+	    export CCACHE_DIR=$(ccdir)
+	    if [ ! -d $CCACHE_DIR ]; then
+	        ccdir -m
+	    fi
+	    echo "CCACHE_DIR=$CCACHE_DIR"
+	    echo ""
+	    echo ""
+
+	    ccache -M 50G
+	    make $@
+	else
+		echo 'Need $TARGET_BUILD_VARIANT'
+	fi
+fi
+fi
+
+echo "Build Time: $TIME_BEGIN ~ $(date)"
+
+
+#build_all_noprebuilt
+#Build image with prebuilt app from MASD and GPD
+
+#build_all_noprebuilt ONLYSDKAP=true
+#Build image with prebuilt app only from GPD
+
+#build_all_noprebuilt PREBUILT_AP=false
+#Build image with MASD and GPD app from source
+
+#build_all_noprebuilt PREBUILT_AP=false ONLYSDKAP=true
+#Build image only with GPD app from source

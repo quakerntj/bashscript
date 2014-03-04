@@ -1,7 +1,0 @@
-#!/bin/bash
-ga
-cd /apps/Rosie/src/com/htc/launcher/
-if [ $# -gt 1 ]; then
-	echo $@
-	$@
-fi

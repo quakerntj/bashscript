@@ -1,0 +1,20 @@
+#!/bin/bash
+echo Finding git directories may take time...
+for gitpath in $(find . -wholename ./.repo -prune -o -name .git);
+do
+    echo $gitpath
+    if [ "$gitpath" != "" -a -d "$gitpath" ]; then
+	    pushd . > /dev/null
+	    cd $gitpath/..
+	    pwd
+	    git chk | grep ^M -q && git commit -a -m "
+[COPYRIGHT] CopyRight Refactory
+
+Symptom: N/A
+Root Cause: N/A
+Solution: CopyRight Refactory
+Project: DLX / DLP / M7 / EMU
+Note:"
+	    popd > /dev/null
+    fi
+done

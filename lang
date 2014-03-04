@@ -1,13 +1,6 @@
 #!/bin/bash
-ga
-FRAMEWORKS_PATH=
-if [ -d ../common ]; then
-	FRAMEWORKS_PATH=frameworks_gaia
-else
-	FRAMEWORKS_PATH=frameworks
-fi
-
-cd $FRAMEWORKS_PATH/base/core/java/java/lang
+qa
+cd common/frameworks/base/core/lang
 if [ $# -gt 1 ]; then
 	echo $@
 	$@

@@ -1,0 +1,53 @@
+#!/bin/bash
+#clear screen
+echo -e '\0033\0143'
+
+if [ "$TOP" == "" ]; then
+	echo "Need run build/envsetup.sh"
+else
+
+source ~/bashscript/qa "" "" ""
+
+trap "build_status stale" EXIT
+
+#OUT_PATH="/home/quaker/workspace/device/out"
+OUT_PATH=$(gettop)"/out"
+
+if [ ! -d $OUT_PATH ]; then
+	mkdir $OUT_PATH
+fi
+echo "Work dir: $PWD"
+
+# call dropbox
+build_status building
+
+echo ""
+echo -e "\033[44msource ~/bashscript/ccmk $@ 2>&1 | tee $OUT_PATH/bG_L.log\033[0m"
+cp $OUT_PATH/bG_L.log $OUT_PATH/bG_L.log.old
+source ~/bashscript/ccmk $@ 2>&1 | tee $OUT_PATH/bG_L.log.tmp
+cp $OUT_PATH/bG_L.log.tmp $OUT_PATH/bG_L.log
+rm $OUT_PATH/bG_L.log.tmp
+
+# call dropbox
+build_status stale
+
+echo ===========================================
+echo = = = = = = = = = = = = = = = = = = = = = =
+echo ===========================================
+
+grep -A2 -B1 -e "\*\*\*" -e "error:" $OUT_PATH/bG_L.log > $OUT_PATH/bG_E.log
+grep -A2 -B1 -e "warning:" $OUT_PATH/bG_L.log > $OUT_PATH/bG_W.log
+grep "^Install" $OUT_PATH/bG_L.log > $OUT_PATH/bG_I.log
+
+#cat $OUT_PATH/bG_L.log | grep -e "error:" -e "undefine" -e "Build Time:" | awk -v device_path="$TOP" '
+#		{
+#			where = match($0, /^vendor/)
+#			if (where != 0)
+#				print device_path "/" $0
+#			else
+#				print $0
+#		}' | sed 's/\/home\/quaker\/w/~\/w/g' | sed 's/device/g\/dlx/g'
+
+
+# need run envsetup.sh
+fi

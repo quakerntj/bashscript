@@ -1,0 +1,1 @@
+adbs cat /sys/class/power_supply/bq27x00-bat/uevent

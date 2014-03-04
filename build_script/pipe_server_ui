@@ -1,0 +1,23 @@
+#!/bin/bash
+function stop_current_job
+{
+	echo "exit ui"
+	exit 0
+}
+
+trap stop_current_job INT
+
+function pipe_server_ui_main
+{
+	local UICOMMAND
+	local shi;
+	while [ 1 ];
+	do
+		read UICOMMAND
+		shi=$(echo $UICOMMAND | grep exit)
+		if [ "$shi" != "" ]; then
+			break
+		fi
+		$UICOMMAND
+	done
+}

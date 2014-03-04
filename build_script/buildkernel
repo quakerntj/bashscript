@@ -1,0 +1,45 @@
+#!/bin/bash
+
+function ntj_make_kernel_dummy()
+{
+	source qa
+	echo > system/Android.mk
+	echo > external/Android.mk
+	echo > frameworks/Android.mk
+	echo > packages/Android.mk
+	echo > vendor/htc/Android.mk
+	echo > hardware/Android.mk
+	echo > sdk/Android.mk
+	echo > bootable/Android.mk
+	mv dalvik/Android.mk dalvik/Android.mk_
+	echo > dalvik/Android.mk
+	mv libcore/Android.mk libcore/Android.mk_
+	echo > libcore/Android.mk
+	mv bionic/Android.mk bionic/Android.mk_
+	echo > bionic/Android.mk
+	popd
+}
+
+function ntj_clean_kernel_dummy()
+{
+	source qa
+	rm system/Android.mk
+	rm external/Android.mk
+	rm frameworks/Android.mk
+	rm packages/Android.mk
+	rm hardware/Android.mk
+	rm vendor/htc/Android.mk
+	rm sdk/Android.mk
+	rm bootable/Android.mk
+	rm dalvik/Android.mk
+	mv dalvik/Android.mk_ dalvik/Android.mk
+	rm libcore/Android.mk
+	mv libcore/Android.mk_ libcore/Android.mk
+	rm bionic/Android.mk
+	mv bionic/Android.mk_ bionic/Android.mk
+	popd > /dev/null
+}
+
+alias bkd='ntj_make_kernel_dummy'
+alias bkc='ntj_clean_kernel_dummy'
+

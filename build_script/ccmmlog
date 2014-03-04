@@ -1,0 +1,22 @@
+#!/bin/bash
+export USE_CCACHE=1
+#let each build folder use different .ccache
+export CCACHE_DIR=$TOP/.ccache
+ccache -M 20G
+mm -j3 2>&1 | tee ~/workspace/device/out/bG_L.log
+echo ==========================================
+echo = = = = = = = = = CCMM = = = = = = = = = =
+echo ==========================================
+
+grep -A2 -B1 -e "\*\*\*" -e "error:" ~/workspace/device/out/bG_L.log > ~/workspace/device/out/bG_E.log
+grep -A2 -B1 -e "warning:" ~/workspace/device/out/bG_L.log > ~/workspace/device/out/bG_W.log
+grep "^Install" ~/workspace/device/out/bG_L.log > ~/workspace/device/out/bG_I.log
+
+cat ~/workspace/device/out/bG_L.log | grep -e "warning:" -e "error:" -e "undefine" | awk -v device_path="/home/quaker/workspace/device" '
+		{
+			where = match($0, /^vendor/)
+			if (where != 0)
+				print device_path "/" $0
+			else
+				print $0
+		}'

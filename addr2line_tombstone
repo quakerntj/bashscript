@@ -7,7 +7,7 @@
 # /system/lib/libandroidregex.so 00003e10
 #
 # this script translates the dump to
-# $GAIA_ROOT/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-addr2line -f -e $GAIA_ROOT/out/target/product/$GAIA_PROD/symbols/system/lib/libandroidregex.so 00003e10
+# $GAIA_ROOT/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-addr2line -f -e $GAIA_ROOT/out/target/product/$GAIA_PROD/symbols/system/lib/libandroidregex.so 00003e10
 
 GAIA_LOG=
 GAIA_LOG_SPECIFIED="no"
@@ -61,10 +61,8 @@ if [ ! -x "$GAIA_ROOT/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-addr
 	exit
 fi
 
-if [ -d "$GAIA_SYMBOL" ] ; then
-else
-	if [ -d "$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols" ] ; then
-	else
+if [ ! -d "$GAIA_SYMBOL" ] ; then
+	if [ ! -d "$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols" ] ; then
 		echo "symbol file directory not found:"
 		echo "'$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols' is not a directory"
 		echo "exiting..."
@@ -81,30 +79,35 @@ if [ "x$GAIA_LOG_SPECIFIED" = "xyes" ] ; then
 		exit
 	else
 		echo
-		
+
 		#LINES=`grep -e 'I\/DEBUG.*#[0-9][0-9]\s*pc\s*[0-9a-fA-F]\{8,8\}' -e 'D\/RefBase.*#[0-9][0-9]\s*pc\s*[0-9a-fA-F]\{8,8\}' "$GAIA_LOG" | sed 's/\r//g'`
-		LINES=`grep -e 'I\/.*#[0-9][0-9]\s*pc\s*[0-9a-fA-F]\{8,8\}' -e 'D\/RefBase.*#[0-9][0-9]\s*pc\s*[0-9a-fA-F]\{8,8\}' "$GAIA_LOG" | sed 's/\r//g'`
+		LINES=`grep -e '.*#[0-9][0-9]\s*pc\s*[0-9a-fA-F]\{8,8\}' "$GAIA_LOG" | sed 's/\r//g'`
 		echo -e "Call Stack:\n$LINES\n"
 		echo -e "$LINES" | while read -r LINE_READ
 		do
 			SYMBOL_FILE=`echo "$LINE_READ" | sed 's/\(.*\)\(#[0-9][0-9]\)\s*pc\s*\([0-9a-fA-F]\{,8\}\)\s*\(.*\)/\4/g'`
 			SYMBOL_FILE=`echo "$SYMBOL_FILE" | sed 's/ (.*)//g'`
 			#replace lib path which in package
+			# /data/data/lib -> /system/lib
 			SYMBOL_FILE=`echo "$SYMBOL_FILE" | sed 's/data\/data\/[^\/]*\/lib/system\/lib/g'`
+			# /data/plugin/android-rt/system/lib -> /plugin/system/lib
+			SYMBOL_FILE=`echo "$SYMBOL_FILE" | sed 's/data\/plugin\/[^\/]*\/lib/plugin\/system\/lib/g'`
 
 			SYMBOL_ADDR=`echo "$LINE_READ" | sed 's/\(.*\)\(#[0-9][0-9]\)\s*pc\s*\([0-9a-fA-F]\{,8\}\)\s*\(.*\)/\3/g'`
 			#echo "$SYMBOL_FILE"
 			#echo "$SYMBOL_ADDR"
-			#echo "$GAIA_ROOT/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-addr2line -f -e $GAIA_ROOT/out/target/product/$GAIA_PROD/symbols/$SYMBOL_FILE $SYMBOL_ADDR"
+			#echo "$GAIA_ROOT/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-addr2line -f -e $GAIA_ROOT/out/target/product/$GAIA_PROD/symbols/$SYMBOL_FILE $SYMBOL_ADDR"
 
 			#symfile="$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE"
 			#echo "$symfile"
-			#$GAIA_ROOT/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-addr2line -f -e "$symfile" "$SYMBOL_ADDR"
+			#$GAIA_ROOT/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-addr2line -f -e "$symfile" "$SYMBOL_ADDR"
 
-			#echo $GAIA_ROOT/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-addr2line -f -C -e "$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE" "$SYMBOL_ADDR"
-			#$GAIA_ROOT/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-addr2line -f -C -e "$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE" "$SYMBOL_ADDR"
+			#echo $GAIA_ROOT/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-addr2line -f -C -e "$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE" "$SYMBOL_ADDR"
+			#$GAIA_ROOT/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-addr2line -f -C -e "$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE" "$SYMBOL_ADDR"
 
 			#echo "/usr/bin/addr2line -f -C -e $GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE $SYMBOL_ADDR"
+			#/usr/bin/addr2line -f -C -e "$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE" "$SYMBOL_ADDR"
+			echo "/usr/bin/addr2line -f -C -e $GAIA_SYMBOL/$SYMBOL_FILE $SYMBOL_ADDR"
 			/usr/bin/addr2line -f -C -e "$GAIA_SYMBOL/$SYMBOL_FILE" "$SYMBOL_ADDR"
 
 			#SYMBOL_PATH=`readlink -mn $GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE`
@@ -113,7 +116,6 @@ if [ "x$GAIA_LOG_SPECIFIED" = "xyes" ] ; then
 		done
 	fi
 else
-	echo
 	
 	while read -r LINE_READ
 	do
@@ -124,11 +126,12 @@ else
 			SYMBOL_FILE=`echo "$SYMBOL_FILE" | sed 's/data\/data\/[^\/]*\/lib/system\/lib/g'`
 
 			SYMBOL_ADDR=`echo "$LINE_READ" | sed 's/\(.*\)\(#[0-9][0-9]\)\s*pc\s*\([0-9a-fA-F]\{,8\}\)\s*\(.*\)/\3/g'`
-			#echo "$GAIA_ROOT/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-addr2line -f -e $GAIA_ROOT/out/target/product/$GAIA_PROD/symbols/$SYMBOL_FILE $SYMBOL_ADDR"
-			#$GAIA_ROOT/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-addr2line -f -C -e "$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE" "$SYMBOL_ADDR"
+			#echo "$GAIA_ROOT/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-addr2line -f -e $GAIA_ROOT/out/target/product/$GAIA_PROD/symbols/$SYMBOL_FILE $SYMBOL_ADDR"
+			#$GAIA_ROOT/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-addr2line -f -C -e "$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE" "$SYMBOL_ADDR"
 
 			#echo "/usr/bin/addr2line -f -C -e $GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE $SYMBOL_ADDR"
 			#/usr/bin/addr2line -f -C -e "$GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE" "$SYMBOL_ADDR"
+			echo "/usr/bin/addr2line -f -C -e $GAIA_SYMBOL/$SYMBOL_FILE $SYMBOL_ADDR"
 			/usr/bin/addr2line -f -C -e "$GAIA_SYMBOL/$SYMBOL_FILE" "$SYMBOL_ADDR"
 
 			#SYMBOL_PATH=`readlink -mn $GAIA_ROOT/out/target/product/$GAIA_PROD/symbols$SYMBOL_FILE`

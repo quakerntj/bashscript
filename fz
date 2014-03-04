@@ -1,0 +1,144 @@
+#!/bin/bash
+source ~/bashscript/env.sh
+TOP=$(gettop)
+if [ "$TOP" != "" -a -f "$TOP/out/host/linux-x86/bin/fastboot" ]; then
+	FASTBOOT_PATH="$TOP/out/host/linux-x86/bin/fastboot"
+else
+	FASTBOOT_PATH=fastboot
+fi
+
+ZIP_PACK=
+fz_file_name=
+fz_file_name_2=
+fz_file_name_3=
+WORKDIR=
+FZ_ERROR=0
+if [ "$1" == "-h" ]; then
+    FASTBOOT_PATH=htc_fastboot
+    shift;
+elif [ "$1" == "--all" ]; then
+	ZIP_PACK="android-info.txt *.hdr *.img"
+	shift
+elif [ "$1" == "-s" ]; then
+	ZIP_PACK="android-info.txt system.img"
+	shift
+elif [ "$1" == "16" ]; then
+	ZIP_PACK="android-info.txt hboot.img boot.img recovery.img dzdata_16g.* system.img"
+	shift
+elif [ "$1" == "32" ]; then
+	ZIP_PACK="android-info.txt hboot.img boot.img recovery.img dzdata_32g.* system.img"
+	shift
+elif [ "$1" == "64" ]; then
+	ZIP_PACK="android-info.txt hboot.img boot.img recovery.img dzdata_64g.* system.img"
+	shift
+else
+	ZIP_PACK="android-info.txt hboot.img boot.img recovery.img dz* userdata.img system.img"
+fi
+
+if [ "$1" != "" ]; then
+	if [ -d "$1" -a -f "$1/hboot.img" -a -f "$1/boot.img" -a -f "$1/android-info.txt" ]; then
+		echo "Found images at $1"
+		WORKDIR="$1"
+	elif [ -f "$1" ]; then
+    	echo "Found zip at $1"
+    	fz_file_name="$1"
+	    if [ -f "$2" ]; then
+        	echo "Found zip at $2"
+        	fz_file_name_2="$2"
+    	fi
+	    if [ -f "$3" -a "`echo $3 | grep -i BOOT`" != "" ]; then
+        	echo "Found boot zip at $3"
+        	fz_file_name_3="$3"
+    	fi
+
+        # do exchange if there is a partial rom
+        if [ "`echo $fz_file_name_2 | grep partial`" != "" ]; then
+            fz_tmp=$fz_file_name
+            fz_file_name=$fz_file_name_2
+            fz_file_name_2=$fz_tmp
+            echo "Exchange file1 <-> file2"
+        else
+            echo "Found partial rom in file1"
+        fi
+	else
+		echo "No zip/images found at $1"
+		FZ_ERROR=1
+	fi
+fi
+
+if [ $FZ_ERROR -ne 1 ]; then
+
+if [ "$fz_file_name" != "" ]; then
+#    if [ "`zip -sf $fz_file_name | grep qsc_radio.img`" != "" ]; then
+#        echo "zip $fz_file_name -d qsc_radio.img"
+#        zip $fz_file_name -d qsc_radio.img
+#    fi
+	echo -e "\033[44m$FASTBOOT_PATH flash zip $fz_file_name\033[0m"
+	$FASTBOOT_PATH flash zip $fz_file_name
+
+    # reflash if hboot pre-update
+	if [ $? -ne 0 ]; then
+		sleep 6
+		echo -e "\033[44m$FASTBOOT_PATH flash zip $fz_file_name\033[0m"
+		$FASTBOOT_PATH flash zip $fz_file_name
+	fi
+
+    # if there are file 2, the first file is the partial rom.
+    # Now flash the system.img:
+	if [ "$fz_file_name_2" != "" ]; then
+		sleep 6
+		echo -e "\033[44m$FASTBOOT_PATH flash zip $fz_file_name_2\033[0m"
+		$FASTBOOT_PATH flash zip $fz_file_name_2
+	fi
+
+    # reboot
+	if [ $? -eq 0 ]; then
+		$FASTBOOT_PATH reboot
+	fi
+else
+# No input file.  Pack current direction
+	if [ "$WORKDIR" == "" ]; then
+		OUT_PATH=`pwd`
+	else
+		OUT_PATH=$WORKDIR
+	fi
+	if [ -f "$OUT_PATH/boot.img" ]; then
+	    fz_file_name=($(md5sum $OUT_PATH/boot.img));
+	    fz_file_name=${fz_file_name[0]}.zip;
+    else
+	    fz_file_name=images.zip;
+    fi
+
+	pushd . > /dev/null
+
+	cd $OUT_PATH
+	echo -e "\033[44mzip $OUT_PATH/$fz_file_name -j $ZIP_PACK\033[0m"
+	eval zip $fz_file_name -j $ZIP_PACK -x qsc_radio.img
+
+#	zip $fz_file_name -j $OUT_PATH/*.img $OUT_PATH/*.android-info.txt
+
+	popd > /dev/null
+
+	echo "fastboot flash zip $OUT_PATH/$fz_file_name"
+	$FASTBOOT_PATH flash zip $fz_file_name
+
+	if [ $? -ne 0 ]; then
+		sleep 6
+		echo "fastboot flash zip $OUT_PATH/$fz_file_name again"
+		$FASTBOOT_PATH flash zip $fz_file_name
+	fi
+	if [ $? -eq 0 ]; then
+	    echo "May not work in RUU mode"
+        if [ "$fz_file_name_3" != "" ]; then
+            echo "flash rooted boot.img"
+		    echo "fastboot flash zip $OUT_PATH/$fz_file_name_3"
+		    $FASTBOOT_PATH flash zip $fz_file_name_3
+	    fi
+
+		echo "fastboot flash zip reboot..."
+		sleep 3
+		$FASTBOOT_PATH reboot
+	fi
+fi
+
+fi

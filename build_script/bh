@@ -1,0 +1,36 @@
+#!/bin/bash
+source ~/bashscript/qa
+source setbuildenv $@
+
+echo > kernel/Android.mk
+echo > frameworks/Android.mk
+mv dalvik/Android.mk dalvik/Android.mk_
+echo > dalvik/Android.mk
+echo > hardware/Android.mk
+echo > packages/Android.mk
+echo > external/Android.mk
+echo > bootable/Android.mk
+echo > development/Android.mk
+echo > sdk/Android.mk
+
+build_all_noprebuilt hboot -j3 2>&1 | tee out/bG_L.log
+
+rm development/Android.mk
+rm sdk/Android.mk
+rm kernel/Android.mk
+rm frameworks/Android.mk
+rm dalvik/Android.mk
+mv dalvik/Android.mk_ dalvik/Android.mk
+rm hardware/Android.mk
+rm packages/Android.mk
+rm external/Android.mk
+rm bootable/Android.mk
+
+grep -A2 -B1 -e "error:" out/bG_L.log > out/bG_E.log
+grep -A2 -B1 -e "warning:" out/bG_L.log > out/bG_W.log
+grep -e "^Install" out/bG_L.log > out/bG_I.log
+
+date
+
+popd > /dev/null
+

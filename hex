@@ -1,0 +1,7 @@
+#!/bin/bash
+echo $@ | grep -q "0x"
+if [ $? -eq 0 ]; then
+    echo 10o $(($@)) 0 + p | dc
+else
+    echo 16o $@ 0 + p | dc
+fi

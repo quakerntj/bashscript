@@ -1,0 +1,27 @@
+#!/bin/bash
+#Show all peripheral owned file by peripheraldir.list.
+
+PFL_LIST_FILE="/home/quaker/bashscript/peripheraldir.list"
+if [ -f build/envsetup.sh ]; then
+if [ -f "$PFL_LIST_FILE" ]; then
+
+while read line
+do
+    if [ "$line" == "" ]; then
+        echo
+    elif [ -d $line ]; then
+        find $line -type f -o -name .git -prune -o -name .cpplint -prune | sed 's/^\.\///g' | grep -v -e ".git" -e ".cpplint"
+    elif [ -f $line ]; then
+        echo $line
+    else
+        echo "Can't find '$line'" >&2
+    fi
+done < "$PFL_LIST_FILE"
+
+else
+    echo "Need specify a LIST_FILE, for example $PFL_LIST_FILE"
+fi
+else
+    echo "Need be in the code root folder"
+fi
+

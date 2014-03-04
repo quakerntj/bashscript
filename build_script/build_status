@@ -1,0 +1,18 @@
+#!/bin/bash
+DROPBOX_BUILD_PATH="/home/quaker/Dropbox/build"
+eval rm "$DROPBOX_BUILD_PATH/*"
+
+case $1 in
+"running")
+	echo > "$DROPBOX_BUILD_PATH/running";;
+"stoped")
+	echo > "$DROPBOX_BUILD_PATH/stoped";;
+"building")
+	echo > "$DROPBOX_BUILD_PATH/building";;
+"fail")
+	echo > "$DROPBOX_BUILD_PATH/fail";;
+"success")
+	echo > "$DROPBOX_BUILD_PATH/success";;
+"stale")
+	echo > "$DROPBOX_BUILD_PATH/stale";;
+esac

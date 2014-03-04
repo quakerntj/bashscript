@@ -1,0 +1,146 @@
+#!/bin/bash
+pipe=/tmp/pipe.gaia
+#CONFIG_FILE="~/bashscript/build_script/.PipeServierConfig"
+#while read line
+#do
+#	case in `echo $line | awk 'FS=" " { print $1 }'`
+#	"PROFILE1")
+#		echo "PROFILE";
+#		VAR=$((`awk 'FS=" " { print $2 }'`))
+#	esac
+#	a=$(($a+1));
+#	echo $a;
+#done < $CONFIG_FILE
+
+PROFILE1="python sdk/tools/codefilter/codefilter.py -p \"sdk frameworks_gaia sdk_release common\" -m sdk/tools/codefilter/movelist -r \"sdk/tools/codefilter/removelist sdk/tools/codefilter/emulator_removelist\""
+#PROFILE1=". ccmml -j5 ENABLE_MEDIALINK_GESTURE=false ENABLE_OGRE=true ONLYSDKAP=true ENABLE_WIRELESSDONGLE=false BUILD_WITH_WEBKIT="
+PROFILE2=". ccmkl -j5 ENABLE_ANDROID_RT= ENABLE_MEDIALINK_GESTURE=false ENABLE_OGRE=false ONLYSDKAP=true ENABLE_WIRELESSDONGLE=false BUILD_WITH_WEBKIT="
+PROFILE3=". ccmml -j5 ENABLE_GADGET=false ONLYSDKAP=true BUILD_RELEASED_SDK=false ENABLE_ANDROID_RT="
+PROFILE4=". ccmkl -j6 ENABLE_GADGET=false ONLYSDKAP=true BUILD_RELEASED_SDK=false ENABLE_ANDROID_RT="
+#emulator
+PROFILE5=". ccmml -j5 GENERIC_GAIA=true EMULATOR=true ENABLE_ANDROID_RT=false ENABLE_POST_INSTALL=false"
+PROFILE6=". ccmkl -j6 GENERIC_GAIA=true EMULATOR=true ENABLE_ANDROID_RT=false ENABLE_POST_INSTALL=false"
+#PROFILE5=". ccmkl -j6 ENABLE_GAIA_EMULATOR=true EMULATOR=true ENABLE_ANDROID_RT= ENABLE_OGRE=false ONLYSDKAP=true ENABLE_WIRELESSDONGLE=false BUILD_WITH_WEBKIT="
+
+PROFILE_COMMAND=
+
+trap "rm -f $pipe" EXIT
+
+if [[ ! -p $pipe ]]; then
+	mkfifo $pipe
+fi
+
+echo "PIPE Server begin"
+tty
+
+export PIPE_LAST_COMMAND
+
+function sendToClient()
+{
+	if [[ "$CLIENT" != "" && -e "$CLIENT" ]]; then
+		echo -e "$@" > $CLIENT
+	else
+		return -1
+	fi
+}
+
+function getArgument()
+{
+	PROFILE_COMMAND=
+	if [[ "$1" == "p" ]]; then
+		local PROFILE=$2
+		shift 2;
+		local CMD="$@"
+		if [[ "$PROFILE" == "list" ]]; then
+			local RESULT="echo\n1\t$PROFILE1\n2\t$PROFILE2\n3\t$PROFILE3\n4\t$PROFILE4\n5\t$PROFILE5\n6\t$PROFILE6"
+			sendToClient $RESULT
+			if [[ $? -ne 0 ]]; then
+				echo -e $RESULT
+			fi
+			return 0
+		fi
+		if [[ "$CMD" != "" ]]; then
+			case $PROFILE in
+				"1")
+					PROFILE1="$CMD";;
+				"2")
+					PROFILE2="$CMD";;
+				"3")
+					PROFILE3="$CMD";;
+				"4")
+					PROFILE4="$CMD";;
+				"5")
+					PROFILE5="$CMD";;
+				"6")
+					PROFILE6="$CMD";;
+			esac
+		fi
+		case $PROFILE in
+			"1")
+				PROFILE_COMMAND=$PROFILE1;;
+			"2")
+				PROFILE_COMMAND=$PROFILE2;;
+			"3")
+				PROFILE_COMMAND=$PROFILE3;;
+			"4")
+				PROFILE_COMMAND=$PROFILE4;;
+			"5")
+				PROFILE_COMMAND=$PROFILE5;;
+			"6")
+				PROFILE_COMMAND=$PROFILE6;;
+		esac
+	fi
+}
+
+while true
+do
+	if read PIPE_COMMAND <$pipe; then
+		if [[ "$PIPE_COMMAND" == "q" ]]; then
+			break
+		fi
+		if [[ "$PIPE_COMMAND" == "l" ]]; then
+			PIPE_COMMAND=$PIPE_LAST_COMMAND
+		fi
+		if [[ `echo $PIPE_COMMAND | awk 'FS=" " { print $1 }'` == "p" ]] ; then
+			eval getArgument $PIPE_COMMAND
+			if [[ "$PROFILE_COMMAND" != "" ]] ; then
+				PIPE_COMMAND="$PROFILE_COMMAND"
+			else
+				continue
+			fi
+		fi
+		echo $PIPE_COMMAND | grep export -q
+		if [[ $? -eq 0 ]]; then
+			$PIPE_COMMAND
+			continue
+		fi
+
+		notify-send -u low "PIPE Server" "$PIPE_COMMAND"
+		DATE_BEGIN=$(date)
+		echo
+		echo_green "$PWD"
+		echo_red "$PIPE_COMMAND"
+		$PIPE_COMMAND
+		FINISH_CODE=$?
+		PIPE_LAST_COMMAND=$PIPE_COMMAND
+		if [[ $FINISH_CODE -eq 0 ]]; then
+			FINISH_STRING="0"
+		else
+			FINISH_STRING="\033[31m`errno $FINISH_CODE`\033[0m"
+		fi
+		DATE_END=$(date)
+		echo "--- --- --- --- --- --- ---"
+		echo -e "| \033[44m$PIPE_COMMAND\033[0m [$FINISH_STRING]"
+		echo "| $DATE_BEGIN ~"
+		echo "| $DATE_END"
+		echo "--- --- --- --- --- --- ---"
+
+		notify-send -u normal "PIPE Server" "$PIPE_COMMAND ($FINISH_CODE)"
+#		if [[ "$CLIENT" != "" && -e "$CLIENT" ]]; then
+#			echo "$PIPE_COMMAND ($FINISH_CODE) done" > $CLIENT
+#		fi
+	fi
+done
+
+echo "Server exiting"
+

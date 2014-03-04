@@ -1,0 +1,36 @@
+#!/bin/bash
+TIME_BEGIN=$(date)
+echo "Build begin at $TIME_BEGIN"
+
+if [ "$TARGET_BUILD_VARIANT" == "" ]; then
+	echo "can't find \$TARGET_BUILD_VARIANT"
+else
+if [ "$TOP" != "" ]; then
+	export USE_CCACHE=1
+	#let each build folder use different .ccache
+	if [ "$TARGET_PRODUCT" == "" ]; then
+		export CCACHE_DIR=/media/w3/ccache/default
+	else
+		export CCACHE_DIR=/media/w3/ccache/$TARGET_PRODUCT/$TARGET_BUILD_VARIANT
+	fi
+
+	ccache -M 50G
+	#build_all_noprebuilt ONLYSDKAP=true TELTEST=true $@
+	build_all_noprebuilt TELTEST=true $@
+fi
+fi
+
+echo "Build Time: $TIME_BEGIN ~ $(date)"
+
+
+#build_all_noprebuilt
+#Build image with prebuilt app from MASD and GPD
+
+#build_all_noprebuilt ONLYSDKAP=true
+#Build image with prebuilt app only from GPD
+
+#build_all_noprebuilt PREBUILT_AP=false
+#Build image with MASD and GPD app from source
+
+#build_all_noprebuilt PREBUILT_AP=false ONLYSDKAP=true
+#Build image only with GPD app from source

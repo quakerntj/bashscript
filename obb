@@ -1,0 +1,1 @@
+adb push ~/w/device/sdk/example/storage/ObbTest/main.1.ObbTest.obb /storage/sdcard0/Android/obb/ObbTest/main.1.ObbTest.obb

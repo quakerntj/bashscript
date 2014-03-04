@@ -1,0 +1,85 @@
+#!/bin/bash
+BINARY_TMPFILE=fakeobj.o
+PCLR_OBJDUMP=/home/quaker/w/device/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin/arm-eabi-objdump
+PCLR_PCLR="pc"
+PCLR_TYPE=0
+PCLR_SHIFT=1e
+
+function pclr_usage {
+    echo ""
+    echo "  pclr <tombsone> [pc|lr] [type [offset]]"
+    echo "    pc, lr   disassamble cod around pc or lr."
+    echo "    type     1 or 2.  Try and error to see which type fit.  Defualt 1"
+    echo "    offset   Default 1E. from 0~40 in hex"
+}
+
+if [ -f "$1" ]; then
+    TOMBSONE_FILE=$1
+
+    if [ "$2" == "pc" -o "$2" == "lr" ]; then
+        PCLR_PCLR="$2"
+        shift
+    fi
+    if [ "$2" != "" ]; then
+        PCLR_TYPE=$2
+        if [ "$3" != "" ]; then
+            PCLR_SHIFT=$3
+        fi
+    fi
+
+    
+    PCLR_PC=`grep -m 1 "lr [0-9a-f]\{8,8\}  pc [0-9a-f]\{8,8\}" $TOMBSONE_FILE | awk '{print $8}'`
+    PCLR_LR=`grep -m 1 "lr [0-9a-f]\{8,8\}  pc [0-9a-f]\{8,8\}" $TOMBSONE_FILE | awk '{print $6}'`
+    PCLR_CODE=`grep "code around $PCLR_PCLR:" -A 5 $TOMBSONE_FILE  | grep "[0-9a-f]\{8,8\}"`
+
+    if [ "$PCLR_PCLR" == "pc" ]; then
+        PCLR_POINTER=$PCLR_PC
+    else
+        PCLR_POINTER=$PCLR_LR
+    fi
+    if [ "$PCLR_TYPE" == "0" ]; then
+        echo "$PCLR_CODE" | grep -q "$PCLR_POINTER"
+        if [ "$?" == "0" ]; then
+            PCLR_TYPE=1
+        else
+            PCLR_TYPE=2
+        fi
+    fi
+
+    echo
+    echo ======================
+    echo "  Code around: $PCLR_PCLR $PCLR_POINTER"
+    echo "  Type = $PCLR_TYPE"
+    echo "$PCLR_CODE"
+    echo
+    echo -e "\033[44m ----------------------------------- \033[0m"
+
+    case $PCLR_TYPE in
+    "1")
+        echo "$PCLR_CODE" | awk '{print $2 " " $3 " " $4 " " $5}' | sed 's/\([0-9a-f]\{4,4\}\)\([0-9a-f]\{4,4\}\)/\2\1/g' | xxd -r -g 4 -c 16 -p > /tmp/$BINARY_TMPFILE
+        echo -e "\033[44mforce-thumb\033[0m"
+        $PCLR_OBJDUMP -EB -M force-thumb -D -b binary -marm7 --start-address=0x$PCLR_SHIFT /tmp/$BINARY_TMPFILE | sed 's/  \(1e\|20\|22\):/> \1:/g'
+        echo "$PCLR_OBJDUMP -EB -M force-thumb -D -b binary -marm7 --start-address=0x$PCLR_SHIFT /tmp/$BINARY_TMPFILE'"
+#        echo ----------------------
+#        echo -e "\033[44mno force-thumb\033[0m"
+#        $PCLR_OBJDUMP -EB -D -b binary -marm7 --start-address=0x$PCLR_SHIFT /tmp/$BINARY_TMPFILE | sed 's/  \(1e\|20\|22\):/> \1:/g'
+        ;;
+    "2")
+        echo "$PCLR_CODE" | awk '{print $2 " " $3 " " $4 " " $5}' | xxd -r -g 4 -c 16 -p > /tmp/$BINARY_TMPFILE
+        #grep "code around $PCLR_PCLR:" -A 4 $TOMBSONE_FILE  | grep "[0-9a-f]\{8,8\}" | awk '{print $2 " " $3 " " $4 " " $5}' | xxd -r -g 4 -c 16 -p > /tmp/$BINARY_TMPFILE
+        echo -e "\033[44mforce-thumb\033[0m"
+        $PCLR_OBJDUMP -EB -M force-thumb -D -b binary -marm7 --start-address=0x$PCLR_SHIFT /tmp/$BINARY_TMPFILE | sed 's/  \(1e\|20\|22\):/> \1:/g'
+        echo "$PCLR_OBJDUMP -EB -M force-thumb -D -b binary -marm7 --start-address=0x$PCLR_SHIFT /tmp/$BINARY_TMPFILE"
+#        echo ----------------------
+#        echo -e "\033[44mno force-thumb\033[0m"
+#        $PCLR_OBJDUMP -EB -M no-force-thumb -D -b binary -marm7 --start-address=0x$PCLR_SHIFT /tmp/$BINARY_TMPFILE | sed 's/  \(1e\|20\|22\):/> \1:/g'
+        ;;
+    "*")
+        echo "unknow type"
+        pclr_usage;;
+    esac
+
+    rm "/tmp/$BINARY_TMPFILE"
+else
+    pclr_usage
+fi

@@ -1,0 +1,37 @@
+#!/bin/bash
+export HTCFW_ENABLED=true
+export HTC_BUILD_STUBS_FLAG=true
+if [ $# == 1 ]; then
+    echo choosecombo 1 dlpdug userdebug
+    echo ... continue?
+    sleep 1
+    . build/envsetup.sh
+    choosecombo 1 dlpdug userdebug
+else
+    echo choosecombo 1 dlpdug userdebug DEBUG
+    echo ... continue?
+    sleep 1
+    . build/envsetup.sh
+    choosecombo 1 dlpdug userdebug DEBUG
+fi
+
+export QA_TOP=`pwd`
+
+export GPROPRIETARY="frameworks_gaia/gaiaproprietary"
+export GFRAMEWORK="frameworks_gaia/gaiaframework"
+export GCORE="frameworks_gaia/gaiacore"
+export GPER="frameworks_gaia/gaiaper"
+export GNIO="frameworks_gaia/nio"
+export GSERVER="frameworks_gaia/gaia_server"
+export GINC="frameworks_gaia/base/include/gaiainclude"
+export GBASE="frameworks_gaia/base"
+
+export CPROPRIETARY="$PWD/frameworks_gaia/gaiaproprietary"
+export CFRAMEWORK="$PWD/frameworks_gaia/gaiaframework"
+export CCORE="$PWD/frameworks_gaia/gaiacore"
+export CPER="$PWD/frameworks_gaia/gaiaper"
+export CNIO="$PWD/frameworks_gaia/nio"
+export CSERVER="$PWD/frameworks_gaia/gaia_server"
+export CINC="$PWD/frameworks_gaia/base/include/gaiainclude"
+export CBASE="$PWD/frameworks_gaia/base"
+

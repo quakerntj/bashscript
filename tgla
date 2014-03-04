@@ -1,0 +1,24 @@
+#!/bin/bash
+if [ -f Android.mk.tgla ]; then
+	if [ -f Android.mk ]; then
+		rm Android.mk
+	fi
+	mv Android.mk.tgla Android.mk
+	echo "mv Android.mk.tgla Android.mk"
+elif [ -f Android.mk ]; then
+	mv Android.mk Android.mk.tgla
+	echo > Android.mk
+	echo "mv Android.mk Android.mk.tgla"
+fi
+
+if [ -f Gaia.mk.tgla ]; then
+	if [ -f Gaia.mk ]; then
+		rm Gaia.mk
+	fi
+	mv Gaia.mk.tgla Gaia.mk
+	echo "mv Gaia.mk.tgla Gaia.mk"
+elif [ -f Gaia.mk ]; then
+	mv Gaia.mk Gaia.mk.tgla
+	echo > Gaia.mk
+	echo "mv Gaia.mk Gaia.mk.tgla"
+fi

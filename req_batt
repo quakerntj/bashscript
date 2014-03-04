@@ -1,0 +1,21 @@
+#!/bin/bash
+Rshare=$[1070000000]
+Rdef=$[909]
+Req=$[0]
+Rdsum=$[ 10000000 / $Rdef]
+
+while [ "$1" != "" ]
+do
+	Rdsum=$[ $Rdsum + 10000000 / $1 ]
+	shift
+done
+Req=$[ 10000000000000 / $Rdsum ]
+Vshare=$[ 33000000 * $Req / ( $Rshare + $Req )]
+# V/20/0.02
+ACSET=$[ $Vshare * 5 / 2 ]
+echo "        01111111"
+echo "Req    =$Req / 10000000"
+echo "Vacset =$Vshare / 10000000"
+echo "ACSET  =$ACSET / 10000000"
+
+

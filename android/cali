@@ -1,0 +1,1 @@
+adb shell "cat /sys/android_touch/ts_SetCal"

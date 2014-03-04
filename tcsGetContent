@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#mawk -v regexp='^\['$2'\]' '
+#    {RS='\n\n'}
+#    $0 ~ regexp {print $0; print '\n'}' $1
+
+gawk -v regexp='^\\['$2'\\]' '
+    {RS='\n\n'}
+    $0 ~ regexp {print $0; print '\n'}' $1

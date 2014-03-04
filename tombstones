@@ -1,0 +1,7 @@
+#!/bin/bash
+if [[ -d $1 ]]; then
+	adb pull /data/tombstones $1	
+else
+	rm ~/log/tombstones/*
+	adb pull /data/tombstones ~/log/tombstones
+fi

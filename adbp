@@ -1,6 +1,10 @@
 #!/bin/bash
 
-OUT=$GOUT_SYSTEM
+if [ "$OUT" == "" ]; then
+	OUT_SYSTEM="/home/quaker/workspace/device/out/target/product/$BOARD/system"
+else
+	OUT_SYSTEM="$OUT/system"
+fi
 
 if [ $# -lt 1 ]; then
 	echo "	adbp [-e] [ts] <lib|bin|pkg|mod> <filename>"
@@ -11,7 +15,7 @@ if [ $# -lt 1 ]; then
 fi
 
 if [ "$1" == "e" ]; then
-	gedit ~/bashscript/adbp &
+	gedit /home/quaker/bashscript/adbp &
 	exit 0
 fi
 
@@ -20,20 +24,14 @@ if [ "$1" == "-e" ]; then
 	shift
 fi
 
-if [ "$1" == "ts" ]; then
-	OUT=$GOUT_SYSTEM2
-	shift
-fi
-
-
 adb $EMU "wait-for-device"
-
+adb remount
 case $1 in
 	"lib")
-		echo From: $OUT/lib/lib$2.so;
+		echo From: $OUT_SYSTEM/lib/lib$2.so;
 		echo  To : system/lib;
-		#adb $EMU push $OUT/lib/lib$2.so system/lib;;
-		echo $OUT/lib/lib$2.so | awk '
+		#adb $EMU push $OUT_SYSTEM/lib/lib$2.so system/lib;;
+		echo $OUT_SYSTEM/lib/lib$2.so | awk '
 {
 	split( $0, A, " " )
 	for(i = 1 ; i <= NF ; i++) {
@@ -45,18 +43,25 @@ case $1 in
 		source /tmp/push_list;
 		rm /tmp/push_list;;
 	"bin")
-		echo From: $OUT/bin/$2;
+		echo From: $OUT_SYSTEM/bin/$2;
 		echo  To : system/bin;
-		adb $EMU push $OUT/bin/$2 system/bin;;
+		echo adb $EMU push "$OUT_SYSTEM/bin/$2" system/bin;
+		eval adb $EMU push "$OUT_SYSTEM/bin/$2" system/bin ;;
 	"mod")
-		echo From: $OUT/lib/evas/modules/engines/$2/$3;
+		echo From: $OUT_SYSTEM/lib/evas/modules/engines/$2/$3;
 		echo  To : system/lib/evas/modules/engines/$2;
-		adb $EMU push $OUT/lib/evas/modules/engines/$2/$3 system/lib/evas/modules/engines/$2;;
+		eval adb $EMU push "$OUT_SYSTEM/lib/evas/modules/engines/$2/$3" system/lib/evas/modules/engines/$2 ;;
 	"pkg")
-		echo From: $OUT/app/$2.apk;
+		echo From: $OUT_SYSTEM/app/$2.pkg;
 		echo  To : system/app;
-		adb $EMU push $OUT/app/$2.apk system/app;;
+		echo adb $EMU install -r $OUT_SYSTEM/app/$2.pkg ;
+		eval adb $EMU install -r $OUT_SYSTEM/app/$2.pkg ;;
+	"apk")
+		echo From: $OUT_SYSTEM/app/$2.apk;
+		echo  To : system/app;
+		echo adb $EMU install -r $OUT_SYSTEM/app/$2.apk ;
+		eval adb $EMU install -r $OUT_SYSTEM/app/$2.apk ;;
 	*)
-		echo adb push $OUT/$2/$3 system/$2;
-		adb push $OUT/$2/$3 system/$2;;
+		echo adb push $OUT_SYSTEM/$2/$3 system/bin/$2;
+		eval adb push $OUT_SYSTEM/$2/$3 system/bin/$2 ;;
 esac
