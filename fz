@@ -6,6 +6,7 @@ if [ "$TOP" != "" -a -f "$TOP/out/host/linux-x86/bin/fastboot" ]; then
 else
 	FASTBOOT_PATH=fastboot
 fi
+    FASTBOOT_PATH=htc_fastboot
 
 ZIP_PACK=
 fz_file_name=

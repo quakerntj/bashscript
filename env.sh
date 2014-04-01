@@ -167,6 +167,21 @@ function one_godir()
     echo $T/$pathname
 }
 
+function gglist()
+{
+    T=$(gettop);
+    echo -n "Creating gglist index...";
+    cd $T;
+    unset GG_LIST
+    (cd $T/frameworks_gaia; find . -regex ".*\.h$" > $T/gglist.tmp;)
+    (cd $T/common; find . -wholename ./external -prune -o -wholename ./bionic -prune -o -wholename ./development -prune -o -regex ".*\.h$" >> $T/gglist.tmp)
+    (cd $T/bsp; find . -wholename ./external -prune -o -wholename ./device -prune -o -wholename ./development -prune -o -regex ".*\.h$" >> $T/gglist.tmp)
+    cat gglist.tmp |  xargs -I 'file' basename 'file' .h | sort | uniq > gglist
+    rm gglist.tmp
+    echo "Done"
+    echo ""
+}
+
 function gfilelist()
 { 
     T=$(gettop);
@@ -208,8 +223,8 @@ function melddd()
         # remove tail '/'
         local ROOT1="${1%/}"
         local ROOT2="${2%/}"
-        local ROOT3="${2%/}"
-        local COMMON_PATH="${3%/}"
+        local ROOT3="${3%/}"
+        local COMMON_PATH="${4%/}"
         # if the $3 exist maybe contain the root1 or root2
         if [ -e $3 ]; then 
             COMMON_PATH=${COMMON_PATH#$1}
@@ -451,16 +466,38 @@ function chapi()
     grep api Gaia.xml
 }
 
+function _gg()
+{
+    T=$(gettop)
+    if [ -z $GG_LIST ]; then
+        if [[ ! -f $T/gglist ]]; then
+            gglist
+        fi
+        readarray GG_LIST < $T/gglist
+    fi
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-function gg () 
+    COMPREPLY=( $(compgen -W "${GG_LIST[*]}" -- ${cur}) )
+    return 0
+}
+complete -F _gg -o nospace gg
+
+function gg ()
 { 
     if [[ -z "$1" ]]; then
         echo "Usage: gg <regex>";
         return;
     fi;
     T=$(gettop);
+    if [[ ! -d $T ]]; then
+        echo "No root folder";
+        return;
+    fi
     if [[ ! -f $T/filelist ]]; then
-        echo -n "No index...";
+        echo "No index...";
         return;
     fi;
     local lines;
@@ -605,28 +642,36 @@ function vendorchk {
         echo "Need in root folder"
         return
     fi
-    echo chk vendor/htc/QXDM2SD/
-    cd vendor/htc/QXDM2SD/
+    if [ -d vendor/htc ]; then
+        VENDORNAME=htc
+    elif [ -d vendor/ginkgo ]; then
+        VENDORNAME=ginkgo
+    else
+        echo "Need in root folder"
+        return
+    fi
+    echo chk vendor/$VENDORNAME/QXDM2SD/
+    cd vendor/$VENDORNAME/QXDM2SD/
     git chk .
     cd -
     
-    echo chk vendor/htc/SsdTestTool/
-    cd vendor/htc/SsdTestTool/
+    echo chk vendor/$VENDORNAME/SsdTestTool/
+    cd vendor/$VENDORNAME/SsdTestTool/
     git chk .
     cd -
     
-    echo chk vendor/htc/GaiaTools/
-    cd vendor/htc/GaiaTools/
+    echo chk vendor/$VENDORNAME/GaiaTools/
+    cd vendor/$VENDORNAME/GaiaTools/
     git chk .
     cd -
     
-    echo chk vendor/htc/CruiserPwrExpert/
-    cd vendor/htc/CruiserPwrExpert/
+    echo chk vendor/$VENDORNAME/CruiserPwrExpert/
+    cd vendor/$VENDORNAME/CruiserPwrExpert/
     git chk .
     cd -
 
-    echo chk vendor/htc/UserTrialFeedback/
-    cd vendor/htc/UserTrialFeedback/
+    echo chk vendor/$VENDORNAME/UserTrialFeedback/
+    cd vendor/$VENDORNAME/UserTrialFeedback/
     git chk .
     cd -
 }

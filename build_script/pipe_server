@@ -66,9 +66,9 @@ function getArgument()
 				"2")
 					PROFILE2="$CMD";;
 				"3")
-					PROFILE3="$CMD";;
+					PROFILE3="$PROFILE3 $CMD";;
 				"4")
-					PROFILE4="$CMD";;
+					PROFILE4="$PROFILE4 $CMD";;
 				"5")
 					PROFILE5="$CMD";;
 				"6")
