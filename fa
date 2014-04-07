@@ -1,7 +1,0 @@
-fastboot flash hboot hboot.img
-fastboot reboot-bootloader
-sleep 5
-fastboot flash boot boot.img
-fastboot flash system system.img
-fastboot flash userdata userdata.img
-fastboot reboot

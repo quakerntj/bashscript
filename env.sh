@@ -170,13 +170,21 @@ function one_godir()
 function gglist()
 {
     T=$(gettop);
-    echo -n "Creating gglist index...";
     cd $T;
     unset GG_LIST
-    (cd $T/frameworks_gaia; find . -regex ".*\.h$" > $T/gglist.tmp;)
-    (cd $T/common; find . -wholename ./external -prune -o -wholename ./bionic -prune -o -wholename ./development -prune -o -regex ".*\.h$" >> $T/gglist.tmp)
-    (cd $T/bsp; find . -wholename ./external -prune -o -wholename ./device -prune -o -wholename ./development -prune -o -regex ".*\.h$" >> $T/gglist.tmp)
-    cat gglist.tmp |  xargs -I 'file' basename 'file' .h | sort | uniq > gglist
+    if [ -d frameworks_gaia ]; then 
+        echo -n "Creating gglist index for gaia ...";
+        (cd $T/frameworks_gaia; find . -regex ".*\.h$" > $T/gglist.tmp;)
+        (cd $T/common; find . -wholename ./external -prune -o -wholename ./bionic -prune -o -wholename ./development -prune -o -regex ".*\.h$" >> $T/gglist.tmp)
+        (cd $T/bsp; find . -wholename ./external -prune -o -wholename ./device -prune -o -wholename ./development -prune -o -regex ".*\.h$" >> $T/gglist.tmp)
+        cat gglist.tmp |  xargs -I 'file' basename 'file' .h | sort | uniq > gglist
+    elif [ -d external ] ; then
+        echo -n "Creating gglist index for android ...";
+        (cd $T/frameworks; find . -regex ".*\.java$" > $T/gglist.tmp;)
+        (cd $T/frameworks; find . -regex ".*\.h$" >> $T/gglist.tmp;)
+        (cd $T/frameworks; find . -regex ".*\.cpp$" >> $T/gglist.tmp;)
+        cat gglist.tmp |  xargs -I 'file' basename 'file' .h | sort | uniq > gglist
+    fi
     rm gglist.tmp
     echo "Done"
     echo ""
