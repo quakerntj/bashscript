@@ -7,10 +7,11 @@ if [ "$1" != "" -a -d "out/target/product/$1" ]; then
 elif [ -d "$ANDROID_PRODUCT_OUT" ]; then
 	OUT_OUT="$ANDROID_PRODUCT_OUT"
 else
-	type get_abs_build_var > /dev/null
-	if [ $? -eq 0 ]; then
-		OUT_OUT=`get_abs_build_var PRODUCT_OUT`
-	fi
+    getout
+#	type get_abs_build_var > /dev/null
+#	if [ $? -eq 0 ]; then
+#		OUT_OUT=`get_abs_build_var PRODUCT_OUT`
+#	fi
 fi
 
 if [ -d "$OUT_OUT" ]; then

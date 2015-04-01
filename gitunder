@@ -1,4 +1,5 @@
 #!/bin/bash
+source ~/bashscript/env.sh
 echo Finding git directories may take time...
 for gitpath in $(find . -wholename ./.repo -prune -o -name .git);
 do
@@ -8,6 +9,9 @@ do
 	    cd $gitpath/..
 	    pwd
 	    $@
+	    if [ $? -ne 0 ]; then
+	        echo -e "\e[91m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ \e[0m"
+	    fi
 	    popd > /dev/null
     fi
 done

@@ -15,8 +15,8 @@ pipe=/tmp/pipe.gaia
 PROFILE1="python sdk/tools/codefilter/codefilter.py -p \"sdk frameworks_gaia sdk_release common\" -m sdk/tools/codefilter/movelist -r \"sdk/tools/codefilter/removelist sdk/tools/codefilter/emulator_removelist\""
 #PROFILE1=". ccmml -j5 ENABLE_MEDIALINK_GESTURE=false ENABLE_OGRE=true ONLYSDKAP=true ENABLE_WIRELESSDONGLE=false BUILD_WITH_WEBKIT="
 PROFILE2=". ccmkl -j5 ENABLE_ANDROID_RT= ENABLE_MEDIALINK_GESTURE=false ENABLE_OGRE=false ONLYSDKAP=true ENABLE_WIRELESSDONGLE=false BUILD_WITH_WEBKIT="
-PROFILE3=". ccmml -j5 ENABLE_GADGET=false ONLYSDKAP=true BUILD_RELEASED_SDK=false ENABLE_ANDROID_RT="
-PROFILE4=". ccmkl -j6 ENABLE_GADGET=false ONLYSDKAP=true BUILD_RELEASED_SDK=false ENABLE_ANDROID_RT="
+PROFILE3=". ccmml -j5 ENABLE_GADGET=false ONLYSDKAP=true BUILD_RELEASED_SDK=false"
+PROFILE4=". ccmkl -j6 ENABLE_GADGET=false ONLYSDKAP=true BUILD_RELEASED_SDK=false"
 #emulator
 PROFILE5=". ccmml -j5 GENERIC_GAIA=true EMULATOR=true ENABLE_ANDROID_RT=false ENABLE_POST_INSTALL=false"
 PROFILE6=". ccmkl -j6 GENERIC_GAIA=true EMULATOR=true ENABLE_ANDROID_RT=false ENABLE_POST_INSTALL=false"

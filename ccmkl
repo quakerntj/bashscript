@@ -35,7 +35,7 @@ echo ===========================================
 echo = = = = = = = = = = = = = = = = = = = = = =
 echo ===========================================
 
-grep -A2 -B1 -e "\*\*\*" -e "error:" $OUT_PATH/bG_L.log > $OUT_PATH/bG_E.log
+grep -A2 -B1 -e "\*\*\*" -e "error:" $OUT_PATH/bG_L.log | grep -v aapt > $OUT_PATH/bG_E.log
 grep -A2 -B1 -e "warning:" $OUT_PATH/bG_L.log > $OUT_PATH/bG_W.log
 grep "^Install" $OUT_PATH/bG_L.log > $OUT_PATH/bG_I.log
 

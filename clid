@@ -110,7 +110,7 @@ function getAllClid
 }
 
 if [ "$1" == "-a" ]; then
-    getAllClid | sort -r
+    getAllClid | sort -r -n
 else
-    getAllClid | sort -r| head
+    getAllClid | sort -r -n| head
 fi

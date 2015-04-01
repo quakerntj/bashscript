@@ -3,12 +3,13 @@ qa > /dev/null
 INCLUDE_PATH=
 INCLUDE_PATH_COMMON="common/frameworks/base/include"
 INCLUDE_PATH_GAIA="frameworks_gaia/base/include/gaiainternal"
+INCLUDE_PATH_NATIVE="common/frameworks/native/include"
 INCLUDE_PATH_SDK="sdk/include/gaia"
 
 #Because using source, need reset OPTIND to 1 for variable parse.
 OPTIND=1
 
-while getopts "cgs" WHICH_INC
+while getopts "cgsn" WHICH_INC
 do
 	echo $WHICH_INC
 	case $WHICH_INC in 
@@ -21,8 +22,11 @@ do
 	s)
 		INCLUDE_PATH="$INCLUDE_PATH_SDK"
 		break;;
+	n)
+		INCLUDE_PATH="$INCLUDE_PATH_NATIVE"
+		break;;
 	?)
-		echo "Syntax: inc -c/g/s"
+		echo "Syntax: inc -c/g/s/n"
 		break;;
 	esac
 done

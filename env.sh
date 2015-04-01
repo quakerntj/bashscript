@@ -1,8 +1,13 @@
 #!/bin/bash
 
 #if import the path of arm-eabi-xxx will effect the build system
-export PATH=$PATH:~/bashscript:~/bashscript/build_script:~/w/android_tools/:~/bin:~/w/device/sdk/tools/cpplint_forgaia
+export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
 
+#For MTK
+export PATH=$PATH:/media/w4/h/arm-2011.09-70-arm-none-linux-gnueabi/bin
+export PATH=$PATH:/media/w4/h/arm-2014.05-28-arm-none-eabi/bin
+
+export PATH=$PATH:$JAVA_HOME/bin:~/bashscript:~/bashscript/build_script:~/w/android_tools/:~/bin:~/w/device/sdk/tools/cpplint_forgaia
 #for cscope to openfile
 export EDITOR=gedit
 
@@ -19,6 +24,7 @@ alias ga='. ga'
 alias qa='. qa'
 alias b='popd'
 alias d='cd ..'
+alias c='croot'
 alias g='. g'
 alias go='gnome-open'
 alias gosmb='. gosmb'
@@ -43,6 +49,7 @@ alias picll='. picl l'
 alias pisrv='. pipe_server'
 alias gitmeld='meld'
 alias du='du -h'
+alias tresize='resize -s 29 212'
 
 # Project shortcut
 alias mr='cd ~/w/h/m7mr'
@@ -53,6 +60,7 @@ alias jb41='cd /media/w2/jb41'
 alias jb42='cd /media/w2/jb42'
 alias jb43='cd /media/w2/jb43'
 alias jb44='cd /media/w2/jb44'
+alias l5='cd /media/w2/l5'
 
 alias ff='find . -name'
 alias ffg='find . -iregex'
@@ -181,8 +189,7 @@ function gglist()
     elif [ -d external ] ; then
         echo -n "Creating gglist index for android ...";
         (cd $T/frameworks; find . -regex ".*\.java$" > $T/gglist.tmp;)
-        (cd $T/frameworks; find . -regex ".*\.h$" >> $T/gglist.tmp;)
-        (cd $T/frameworks; find . -regex ".*\.cpp$" >> $T/gglist.tmp;)
+        (cd $T/frameworks; find . -regex ".*\.aidl$" > $T/gglist.tmp;)
         cat gglist.tmp |  xargs -I 'file' basename 'file' .h | sort | uniq > gglist
     fi
     rm gglist.tmp
@@ -684,6 +691,14 @@ function vendorchk {
     cd -
 }
 
+function cleanRemoteBranch() {
+    local main=$(git branch -r | grep "m/htc" | sed "s[  m/htc -. \(.*\)[\1[g")
+    echo m/htc == $main
+    if [ "$main" != "" ]; then
+        git branch -r | grep -v -e ">" -e "  $main\$" | xargs git branch -d -r
+    fi
+}
+
 function uagcc {
     sudo update-alternatives --config gcc
 }
@@ -816,6 +831,55 @@ function gerrit {
         fi
         ;;
     esac
+}
+
+
+function getout() {
+    pushd . > /dev/null
+    type croot 2>/dev/null 1>/dev/null
+    
+    if [ $? -eq 0 ]; then
+        croot
+    else
+        . qa > /dev/null
+    fi
+
+    if [ ! -d "out/target/product" ]; then
+        popd > /dev/null
+        return 1;
+    fi
+    for line in $(ls out/target/product/ -1)
+    do
+        if [ -d "out/target/product/$line" ]; then
+            if [ "out/target/product/$line" == "generic" ]; then
+                continue
+            fi
+            if [ -f "out/target/product/$line/system.img" ]; then
+                OUT_OUT="out/target/product/$line"
+                echo $line
+                popd > /dev/null
+                return 0;
+            fi
+        fi
+    done
+    popd > /dev/null
+    return 1;
+}
+
+function killproc() {
+    adbs kill -s 9 $2
+}
+
+function killp() {
+    killproc `adbs ps | grep $1`
+}
+
+function cleanPublish() {
+    if [ "$1" != "" ]; then
+        repo forall -c rm -v .git/refs/published/$1 2>/dev/null
+    else
+        echo "Usage: cleanPublish <branch name>"
+    fi
 }
 
 

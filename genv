@@ -1,18 +1,23 @@
 #!/bin/bash
 export HTCFW_ENABLED=true
 export HTC_BUILD_STUBS_FLAG=true
+#export GAIA_DEVICE=dlpdtu
+export GAIA_DEVICE=htc_a5tl
+if [ "$1" != "" ]; then
+    GAIA_DEVICE=$1
+fi
 if [ $# == 1 ]; then
-    echo choosecombo 1 dlpdug userdebug
+    echo choosecombo 1 $GAIA_DEVICE userdebug
     echo ... continue?
     sleep 1
     . build/envsetup.sh
-    choosecombo 1 dlpdug userdebug
+    choosecombo 1 $GAIA_DEVICE userdebug
 else
-    echo choosecombo 1 dlpdug userdebug DEBUG
+    echo choosecombo 1 $GAIA_DEVICE userdebug DEBUG
     echo ... continue?
     sleep 1
     . build/envsetup.sh
-    choosecombo 1 dlpdug userdebug DEBUG
+    choosecombo 1 $GAIA_DEVICE userdebug DEBUG
 fi
 
 export QA_TOP=`pwd`

@@ -1,0 +1,16 @@
+#!/bin/bash
+if [[ $# == 0 ]]; then
+    echo "print hex to binary"
+    echo "hex2bin <hex with or without 0x>"
+    echo "example: hex2bin f3 d4 cc"
+fi
+while [[ $# != 0 ]];
+do
+    echo $1 | grep -q "0x"
+    if [ $? -eq 0 ]; then
+        echo 2o $(($1)) 0 + p | dc
+    else
+        echo 2o $((0x$1)) 0 + p | dc
+    fi
+    shift
+done

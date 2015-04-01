@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ $# -eq 4 ]; then
+    GAIA_SRC_ROOT=`readlink -f $1`
+    GAIA_TAR_ROOT=`readlink -f $2`
+    if [ ! -d $GAIA_SRC_ROOT/$3/.git ]; then
+        echo "$GAIA_SRC_ROOT/$3 not exist a git"
+        exit;
+    fi
+    if [ !  -d $GAIA_TAR_ROOT/$3/.git ]; then
+        echo "$GAIA_TAR_ROOT/$3 not exist a git"
+        exit;
+    fi
+    echo "$GAIA_SRC_ROOT/$3 -> $GAIA_TAR_ROOT/$3"
+    cd  $GAIA_SRC_ROOT/$3
+    echo "git push $GAIA_TAR_ROOT/$3 HEAD:$4"
+    git push $GAIA_TAR_ROOT/$3 HEAD:$4
+else
+    echo "$0 <src_root> <tar_root> <common_folder> <branch_name>"
+fi

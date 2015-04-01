@@ -1,7 +1,10 @@
 #!/bin/bash
-
+. ~/bashscript/env.sh
 if [ "$OUT" == "" ]; then
-	OUT_SYSTEM="/home/quaker/workspace/device/out/target/product/$BOARD/system"
+    if [ "$BOARD" == "" ]; then
+        BOARD=$(getout)
+    fi
+    OUT_SYSTEM="/home/quaker/w/device/out/target/product/$BOARD/system"
 else
 	OUT_SYSTEM="$OUT/system"
 fi
@@ -56,6 +59,11 @@ case $1 in
 		echo  To : system/app;
 		echo adb $EMU install -r $OUT_SYSTEM/app/$2.pkg ;
 		eval adb $EMU install -r $OUT_SYSTEM/app/$2.pkg ;;
+	"pkgs")
+		echo From: $OUT_SYSTEM/app/$2.pkg;
+		echo  To : system/app;
+		echo adb $EMU push $OUT_SYSTEM/app/$2.pkg /system/app;
+		eval adb $EMU push $OUT_SYSTEM/app/$2.pkg /system/app;;
 	"apk")
 		echo From: $OUT_SYSTEM/app/$2.apk;
 		echo  To : system/app;
