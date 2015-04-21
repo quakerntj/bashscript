@@ -17,6 +17,10 @@ function nameVideoByDate() {
         return -1;
     fi
     new_name=`date -d "$creation_time" +%Y%m%d_%H%M%S`
+    if [ "$new_name" == "" ]; then
+        echo "Date formating fail \"$creation_time\""
+        return -1;
+    fi
     new_name="$dir_name/$new_name.$ext_name"
     echo "rename $file_name -> $new_name"
     mv -i $1 $new_name
