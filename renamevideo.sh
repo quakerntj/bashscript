@@ -16,10 +16,11 @@ function nameVideoByDate() {
     if [ "$creation_time" == "" ]; then
         return -1;
     fi
-    new_name=`date -d "$creation_time" +%Y%m%d_%H%M%S`
-    if [ "$new_name" == "" ]; then
-        echo "Date formating fail \"$creation_time\""
-        return -1;
+
+    if [ "$(uname)" == "Darwin" ]; then
+        new_name=`date -j -f "%Y-%m-%d %H:%M:%S" "$creation_time" "+%Y%m%d_%H%M%S"`
+    else
+        new_name=`date -d "$creation_time" +%Y%m%d_%H%M%S`
     fi
     new_name="$dir_name/$new_name.$ext_name"
     echo "rename $file_name -> $new_name"
@@ -34,7 +35,10 @@ if [ -d "$1" ]; then
         nameVideoByDate $v
     done
 else
-    nameVideoByDate $1
+    for num
+    do
+        nameVideoByDate $num
+    done
 fi
 
 
