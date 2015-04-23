@@ -1,0 +1,92 @@
+set size square
+set angles degrees
+set polar
+set grid polar 30
+set xtics 30
+unset border
+unset param
+set xrange[-90:90]
+set yrange[-90:90]
+set rrange[0:360]
+set trange[0:90]
+
+set title "GPS satellite tracks"
+set terminal png size 1024,1024
+set output "1.png"
+plot "SV1" using 2:(90-$1) notitle
+set output "2.png"
+plot "SV2" using 2:(90-$1) notitle
+set output "3.png"
+plot "SV3" using 2:(90-$1) notitle
+set output "4.png"
+plot "SV4" using 2:(90-$1) notitle
+set output "5.png"
+plot "SV5" using 2:(90-$1) notitle
+set output "6.png"
+plot "SV6" using 2:(90-$1) notitle
+set output "7.png"
+plot "SV7" using 2:(90-$1) notitle
+set output "8.png"
+plot "SV8" using 2:(90-$1) notitle
+set output "9.png"
+plot "SV9" using 2:(90-$1) notitle
+set output "10.png"
+plot "SV10" using 2:(90-$1) notitle
+set output "11.png"
+plot "SV11" using 2:(90-$1) notitle
+set output "12.png"
+plot "SV12" using 2:(90-$1) notitle
+set output "13.png"
+plot "SV13" using 2:(90-$1) notitle
+set output "14.png"
+plot "SV14" using 2:(90-$1) notitle
+set output "15.png"
+plot "SV15" using 2:(90-$1) notitle
+set output "16.png"
+plot "SV16" using 2:(90-$1) notitle
+set output "17.png"
+plot "SV17" using 2:(90-$1) notitle
+set output "18.png"
+plot "SV18" using 2:(90-$1) notitle
+set output "19.png"
+plot "SV19" using 2:(90-$1) notitle
+set output "20.png"
+plot "SV20" using 2:(90-$1) notitle
+set output "21.png"
+plot "SV21" using 2:(90-$1) notitle
+set output "22.png"
+plot "SV22" using 2:(90-$1) notitle
+set output "23.png"
+plot "SV23" using 2:(90-$1) notitle
+set output "24.png"
+plot "SV24" using 2:(90-$1) notitle
+set output "25.png"
+plot "SV25" using 2:(90-$1) notitle
+set output "26.png"
+plot "SV26" using 2:(90-$1) notitle
+set output "27.png"
+plot "SV27" using 2:(90-$1) notitle
+set output "28.png"
+plot "SV28" using 2:(90-$1) notitle
+set output "29.png"
+plot "SV29" using 2:(90-$1) notitle
+set output "30.png"
+plot "SV30" using 2:(90-$1) notitle
+set output "31.png"
+plot "SV31" using 2:(90-$1) notitle
+set output "32.png"
+plot "SV32" using 2:(90-$1) notitle
+set output "33.png"
+plot "SV33" using 2:(90-$1) notitle
+set output "34.png"
+plot "SV34" using 2:(90-$1) notitle
+set output "35.png"
+plot "SV35" using 2:(90-$1) notitle
+set output "36.png"
+plot "SV36" using 2:(90-$1) notitle
+set output "37.png"
+plot "SV37" using 2:(90-$1) notitle
+set output "38.png"
+plot "SV38" using 2:(90-$1) notitle
+set output "39.png"
+plot "SV39" using 2:(90-$1) notitle
