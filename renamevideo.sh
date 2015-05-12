@@ -16,6 +16,7 @@ function nameVideoByDate() {
     if [ "$creation_time" == "" ]; then
         return -1;
     fi
+
     if [ "$(uname)" == "Darwin" ]; then
         new_name=`date -j -f "%Y-%m-%d %H:%M:%S" "$creation_time" "+%Y%m%d_%H%M%S"`
     else
