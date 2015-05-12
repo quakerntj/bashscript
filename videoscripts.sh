@@ -25,3 +25,13 @@ echo "do \"avconv -i down.mp4 -c:v libx264 -c:a copy -b 4500k -bf 2 -s 1280x720 
 # overlay front camera at top with black border
 #avconv -i vid.mp4 -vf '[in] drawbox=190:8:100:52:black@1 [ii]; movie=vidstab.mp4 [f]; [f] scale=480/5:240/5 [c]; [ii][c] overlay=480/2-480/5/2:10 [out]' -c:v libx264 -b 500k out.mp4
 
+#錄影時使用milisecond定位, 先用avprobe取得時間差, 結束錄影後, 需要將video rate調整成一樣的 (-r 30?) 時序才不會錯亂
+
+#7.93 - 11:09:00.028
+#相差0.501
+#2.37 - 11:09:00.529
+#7.93+0.501-2.37 = 6.061
+#avconv -i vid1.large.mp4 -ss 6.061 -c:v libx264 -s 720x480 -r 30 -b 4500k vid1.mp4
+#avconv -i vid2.large.mp4 -c:v libx264 -s 90x60 -r 30 -b 4500k vid2.mp4
+#avconv -i vid1.mp4 -vf 'movie=vid2.mp4 [f]; [in][f] overlay= [out]' -c:v libx264 -b 500k out.mp4
+
