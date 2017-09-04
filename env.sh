@@ -1,13 +1,6 @@
 #!/bin/bash
 
-#if import the path of arm-eabi-xxx will effect the build system
-export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
-
-#For MTK
-export PATH=$PATH:/media/w4/h/arm-2011.09-70-arm-none-linux-gnueabi/bin
-export PATH=$PATH:/media/w4/h/arm-2014.05-28-arm-none-eabi/bin
-
-export PATH=$PATH:$JAVA_HOME/bin:~/bashscript:~/bashscript/build_script:~/w/android_tools/:~/bin:~/w/device/sdk/tools/cpplint_forgaia
+export PATH=$PATH:$JAVA_HOME/bin:~/bashscript:~/bashscript/build_script::~/bin
 #for cscope to openfile
 export EDITOR=gedit
 
@@ -66,6 +59,29 @@ alias ff='find . -name'
 alias ffg='find . -iregex'
 
 alias cdp='cd `pwd -P`'
+
+function adblp() {
+	adb devices
+	local app_pid=""
+	while [ "$app_pid" == "" ]
+	do
+		app_pid=`adb shell ps | grep "$1" | cut -c10-15`
+	done
+	echo Got ${app_pid//[[:space:]]/}
+
+	adb logcat --pid=${app_pid//[[:space:]]/}
+
+}
+
+
+function adbconn() {
+	local wlan=`adb shell ifconfig | grep wlan -A2 | grep "inet addr" | sed 's/.*inet addr:\([0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\).*/\1/g'`
+	echo "adb tcpip 5555"
+	adb tcpip 5555
+	echo "adb connect $wlan"
+	adb connect $wlan
+	export ADBCONN=$wlan
+}
 
 function gettop()
 { 
@@ -265,6 +281,7 @@ function melddd()
 function isScreenOn()
 {
     #IPowerManager::isScreenOn = 14
+    
     adbs service call power 14 | grep 00000001 -q
     
     #if ScreenOn, grep will return 0.  So we sould inverse it.
