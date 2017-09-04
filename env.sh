@@ -19,7 +19,7 @@ alias b='popd'
 alias d='cd ..'
 alias c='croot'
 alias g='. g'
-alias go='gnome-open'
+alias go='nautilus'
 alias gosmb='. gosmb'
 alias adbl='adb logcat'
 alias adbd='adb devices'
@@ -904,4 +904,20 @@ function cleanPublish() {
 #repo init -u ssh://$ID@$MIRROR:29419/manifest.git -b htc -m gaia_manifest.xml
 export ID=quaker_chung
 export MIRROR=tpe.git.htc.com
+
+
+function jgrep()
+{
+    find . -name .repo -prune -o -name .git -prune -o  -type f -name "*\.java" -print0 | xargs -0 grep --color -n "$@"
+}
+
+function cgrep()
+{
+    find . -name .repo -prune -o -name .git -prune -o -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.h' \) -print0 | xargs -0 grep --color -n "$@"
+}
+
+function ggrep()
+{
+    grep --color -r -n "$@" *
+}
 
