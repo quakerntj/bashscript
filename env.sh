@@ -921,3 +921,39 @@ function ggrep()
     grep --color -r -n "$@" *
 }
 
+function machine()
+{
+    unameOut="$(uname -s)"
+    case "${unameOut}" in
+        Linux*)     machine=Linux;;
+        Darwin*)    machine=Mac;;
+        CYGWIN*)    machine=Cygwin;;
+        MINGW*)     machine=MinGw;;
+        *)          machine="UNKNOWN:${unameOut}";;
+    esac
+    echo ${machine}
+}
+
+# open folder or file by system file manager
+function open()
+{
+    unameOut="$(uname -s)"
+    case "${unameOut}" in
+        Linux*)
+            nautilus $@;;
+        Darwin*)
+            open $@;;
+        CYGWIN*)
+            lnxpath=$(realpath $1)
+            winpath=$(echo $lnxpath | sed -e 's#^/\([cdCD]\)#\1:#' -e 's#/#\\#g')
+            echo "explorer $winpath"
+            explorer $winpath;;
+        MINGW*)
+            lnxpath=$(realpath $1)
+            winpath=$(echo $lnxpath | sed -e 's#^/\([cdCD]\)#\1:#' -e 's#/#\\#g')
+            echo "explorer $winpath"
+            explorer $winpath;;
+        *)          machine="UNKNOWN:${machine}";;
+    esac
+}
+
