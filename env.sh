@@ -69,9 +69,24 @@ function adblp() {
 	done
 	echo Got ${app_pid//[[:space:]]/}
 
-	adb logcat --pid=${app_pid//[[:space:]]/}
-
+    if [ "$2" != "" ]; then
+    	adb logcat --pid=${app_pid//[[:space:]]/} | tee log $2
+	else
+    	adb logcat --pid=${app_pid//[[:space:]]/}
+	fi
 }
+
+function adbkp() {
+	adb devices
+	local app_pid=""
+	while [ "$app_pid" == "" ]
+	do
+		app_pid=`adb shell ps | grep "$1" | cut -c10-15`
+	done
+	echo Got ${app_pid//[[:space:]]/}
+    	adb shell kill -s 9 ${app_pid//[[:space:]]/}
+}
+
 
 
 function adbconn() {
@@ -914,6 +929,11 @@ function jgrep()
 function cgrep()
 {
     find . -name .repo -prune -o -name .git -prune -o -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.h' \) -print0 | xargs -0 grep --color -n "$@"
+}
+
+function csgrep()
+{
+    find . -name .repo -prune -o -name .git -prune -o -type f -name '*.cs' -print0 | xargs -0 grep --color -n "$@"
 }
 
 function ggrep()
