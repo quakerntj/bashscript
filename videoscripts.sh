@@ -35,3 +35,4 @@ echo "do \"avconv -i down.mp4 -c:v libx264 -c:a copy -b 4500k -bf 2 -s 1280x720 
 #avconv -i vid2.large.mp4 -c:v libx264 -s 90x60 -r 30 -b 4500k vid2.mp4
 #avconv -i vid1.mp4 -vf 'movie=vid2.mp4 [f]; [in][f] overlay= [out]' -c:v libx264 -b 500k out.mp4
 
+#avconv -ss 30 -i 2018_0420_010013_001.MOV -i DejaVu_DaveRodger.mp3 -t 00:04:20 -filter_complex "[0:a]volume=1[a0];[1:a]volume=0.3[a1];[a0][a1]amix;[0:v]crop=1000:562:450:260" -s 852x480 -c:v libx264 -r 30 -b:v 1000k out_crop_dejavu.mp4

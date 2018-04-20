@@ -15,7 +15,6 @@ alias lang='. lang'
 alias out='. out'
 alias ga='. ga'
 alias qa='. qa'
-alias b='popd'
 alias d='cd ..'
 alias c='croot'
 alias g='. g'
@@ -26,13 +25,11 @@ alias adbd='adb devices'
 alias adblgsr='adb logcat *:S GSR:* InputReader:* GSRPlayer:*'
 alias lpar='python2.7 ~/workspace/parser/parser.py'
 alias pp='. pp'
-alias bat='. bat'
 alias cs='cscope'
 alias cpplintf='cpplint_forgaia.py --filter=-runtime/int,-readability/variable_name,-build/header_guard,-build/include'
 alias geidt='gedit'
 alias llh='ll -h'
 
-alias ban='. ban'
 alias cbl='. ccbanl'
 alias cml='. ccmml'
 
@@ -59,6 +56,13 @@ alias ff='find . -name'
 alias ffg='find . -iregex'
 
 alias cdp='cd `pwd -P`'
+
+#alias amsue='adb shell am start com.YourCompany.plugin/com.epicgames.ue4.SplashActivity'
+alias amsun='adb shell am start com.vrm.seaofcube.unity/com.htc.vr.unity.WVRUnityVRActivity'
+alias amsue='adb shell am start com.vrm.seaofcube.unreal/com.epicgames.ue4.SplashActivity'
+alias amshl='adb shell am start com.htc.vr.samples.hellovr.unity/com.htc.vr.unity.WVRUnityVRActivity'
+alias amslr='adb shell am start com.htc.mobilevr.launcher/com.htc.vr.unity.WVRUnityVRActivity'
+
 
 function adblp() {
 	adb devices
