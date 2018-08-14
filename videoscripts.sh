@@ -36,3 +36,20 @@ echo "do \"avconv -i down.mp4 -c:v libx264 -c:a copy -b 4500k -bf 2 -s 1280x720 
 #avconv -i vid1.mp4 -vf 'movie=vid2.mp4 [f]; [in][f] overlay= [out]' -c:v libx264 -b 500k out.mp4
 
 #avconv -ss 30 -i 2018_0420_010013_001.MOV -i DejaVu_DaveRodger.mp3 -t 00:04:20 -filter_complex "[0:a]volume=1[a0];[1:a]volume=0.3[a1];[a0][a1]amix;[0:v]crop=1000:562:450:260" -s 852x480 -c:v libx264 -r 30 -b:v 1000k out_crop_dejavu.mp4
+#avconv -i 2018_0804_065450_002.MOV -s 1280x720 -c:v libx264 -r 30 -b:v 2000k out7.mp4
+
+#slow down
+#avconv -i input.mkv -r 16 -filter:v "setpts=1.5*PTS" output.mkv
+#
+
+#ffmpeg -i 2018_0804_053648_003.MOV -framerate 60 -start_number 56 -loop 1 -i NTj86/PNG_%04d.png -filter_complex 'overlay=x=W-w-10:y=H-h-10:shortest=1' -t 00:00:30 -c:v libx264 -b:v 1000k out_overlay.mp4
+#ffmpeg -y -i 0.mp4 -framerate 15 -start_number 52 -loop 1 -i NTj86ColorSmall/PNG_%04d.png -filter_complex 'overlay=x=W-w-10:y=H-h-10:shortest=1' -c:v libx264 -profile:v high -level 4.2 -b:v 2500k 0.logo.mp4
+#https://youtu.be/vMbrHdr5v7I
+#for youtube fast process
+#ffmpeg -i video.mp4 -acodec copy -vcodec copy video.mkv
+
+
+#ffmpeg -i 1.mp4 -c copy -bsf:v h264_mp4toannexb -f mpegts 1.ts
+#ffmpeg -i 2.mp4 -c copy -bsf:v h264_mp4toannexb -f mpegts 2.ts
+#ffmpeg -i "concat:1.ts|2.ts" -c copy -bsf:a aac_adtstoasc out.mp4
+#$ ffmpeg -i "concat:1.ts|2.ts|3.ts|4.ts|5.ts" -framerate 15 -start_number 52 -loop 1 -i NTj86ColorSmall/PNG_%04d.png -filter_complex 'overlay=x=W-w-10:y=H-h-10:shortest=1' -c:v libx264  -profile:v high -level 4.2 -s 960x540 -b:v 1800k -c:a aac_adtstoasc out.mkv
