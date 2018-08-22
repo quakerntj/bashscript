@@ -49,7 +49,39 @@ echo "do \"avconv -i down.mp4 -c:v libx264 -c:a copy -b 4500k -bf 2 -s 1280x720 
 #ffmpeg -i video.mp4 -acodec copy -vcodec copy video.mkv
 
 
-#ffmpeg -i 1.mp4 -c copy -bsf:v h264_mp4toannexb -f mpegts 1.ts
-#ffmpeg -i 2.mp4 -c copy -bsf:v h264_mp4toannexb -f mpegts 2.ts
+#ffmpeg -i 1.mp4 -c:v copy -bsf:v h264_mp4toannexb -c:a libfdk_aac -f mpegts 1.ts
+#ffmpeg -i 2.mp4 -c:v copy -bsf:v h264_mp4toannexb -c:a libfdk_aac -f mpegts 2.ts
 #ffmpeg -i "concat:1.ts|2.ts" -c copy -bsf:a aac_adtstoasc out.mp4
 #$ ffmpeg -i "concat:1.ts|2.ts|3.ts|4.ts|5.ts" -framerate 15 -start_number 52 -loop 1 -i NTj86ColorSmall/PNG_%04d.png -filter_complex 'overlay=x=W-w-10:y=H-h-10:shortest=1' -c:v libx264  -profile:v high -level 4.2 -s 960x540 -b:v 1800k -c:a aac_adtstoasc out.mkv
+
+# Black the GPS time
+# overlay logo
+# scale 960x540
+# audio aac
+
+
+#ffmpeg -y \
+# -ss 00:02:00 -i zzz.MOV \
+# -framerate 15 -start_number 52 -loop 1 -i NTj86ColorSmall/PNG_%04d.png \
+# -filter_complex '[0:v]scale=1920/2:1080/2[mv]; [mv]drawbox=0:500:480:30:black:t=fill[mv2]; [mv2][1:v]overlay=x=W-w-10:y=H-h-10:shortest=1' \
+# -t 00:00:20 \
+# -c:a aac -b:a 128k -c:v libx264 -profile:v high -level 4.2 -r 30 -b:v 2500k zzz.mp4
+
+
+#ffmpeg -y \
+# -ss 00:01:42 -i 180820/2018_0820_124614_004.MOV \
+# -framerate 15 -start_number 52 -loop 1 -i NTj86ColorSmall/PNG_%04d.png \
+# -filter_complex '
+#    [0:a]
+#    equalizer=f=100:t=h:width=50:g=2,
+#    equalizer=f=300:t=h:width=150:g=2,
+#    equalizer=f=34:t=h:width=34:g=-8
+#    [ae];
+#    [0:v]scale=1920/2:1080/2[mv];
+#    [mv]drawbox=0:500:480:30:black@0.8:t=fill[mv1];
+#    [mv1]drawbox=0:500:190:30:black:t=fill[mv2];
+#    [mv2]drawbox=260:500:220:30:black:t=fill[mv3];
+#    [mv3][1:v]overlay=x=W-w-10:y=H-h-10:shortest=1[out]' \
+# -map "[out]" -map "[ae]" \
+# -t 00:00:08 \
+# -c:a aac -b:a 128k -c:v libx264 -profile:v high -level 4.2 -r 30 -b:v 2500k zzz.mp4
