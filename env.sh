@@ -64,43 +64,79 @@ alias amsue='adb shell am start com.vrm.seaofcube.unreal/com.epicgames.ue4.Splas
 alias amshl='adb shell am start com.htc.vr.samples.hellovr.unity/com.htc.vr.unity.WVRUnityVRActivity'
 alias amslr='adb shell am start com.htc.mobilevr.launcher/com.htc.vr.unity.WVRUnityVRActivity'
 
+function rmsim() {
+    rm plugin/Assets/Plugins/WaveVR_Sim*
+}
+
+function am() {
+    #adb devices
+    local pkgname=`adb shell ls //data/data | grep -i -m 1 "$1" | sed 's/ \+/ /g'`
+    if [ "$pkgname" != "" ]; then
+    
+        local activity=`adb shell pm dump "$pkgname" | grep "android.intent.action.MAIN" -A 10 | grep "android.intent.category.LAUNCHER" -B 3 | grep "$pkgname" | sed "s/.*\($pkgname\/[a-zA-Z0-9_\.]*\).*/\1/g"`
+        echo adb shell am start "$activity"
+        adb shell am start "$activity"
+    fi
+}
+
+function adbi() {
+    adb install $@
+}
+
+function adbu() {
+    local pkgname=`adb shell ls //data/data | grep -i -m 1 "$1" | sed 's/ \+/ /g'`
+    if [ "$pkgname" != "" ]; then
+        echo adb uninstall $pkgname
+        adb uninstall $pkgname
+    fi
+}
 
 function adblp() {
-	adb devices
-	local app_pid=""
-	while [ "$app_pid" == "" ]
-	do
-		app_pid=`adb shell ps | grep "$1" | cut -c10-15`
-	done
-	echo Got ${app_pid//[[:space:]]/}
+    adb devices
+    local app_pid=""
+    while [ "$app_pid" == "" ]
+    do
+        app_pid=`adb shell ps | grep -m 1 "$1" | sed 's/ \+/ /g' | cut -d " " -f 2`
+    done
 
-    if [ "$2" != "" ]; then
-    	adb logcat --pid=${app_pid//[[:space:]]/} | tee log $2
-	else
-    	adb logcat --pid=${app_pid//[[:space:]]/}
-	fi
+    pid=${app_pid//[[:space:]]/}
+    # Number check
+    if [ -n "$pid" ] && [ "$pid" -eq "$pid" ] 2>/dev/null; then
+        echo Got $pid
+        echo adb logcat --pid=$pid
+        
+        if [ "$2" != "" ]; then
+            adb logcat --pid=$pid | tee log $2
+        else
+            adb logcat --pid=$pid
+        fi
+    fi
 }
 
 function adbkp() {
-	adb devices
-	local app_pid=""
-	while [ "$app_pid" == "" ]
-	do
-		app_pid=`adb shell ps | grep "$1" | cut -c10-15`
-	done
-	echo Got ${app_pid//[[:space:]]/}
-    	adb shell kill -s 9 ${app_pid//[[:space:]]/}
+    adb devices
+    local app_pid=""
+#    while [ "$app_pid" == "" ]
+#    do
+        app_pid=`adb shell ps | grep -m 1 "$1" | sed 's/ \+/ /g' | cut -d " " -f 2`
+#    done
+
+    pid=${app_pid//[[:space:]]/}
+    # Number check
+    if [ -n "$pid" ] && [ "$pid" -eq "$pid" ] 2>/dev/null; then
+        echo Got $pid
+        echo adb shell kill -s 9 $pid
+        adb shell kill -s 9 $pid
+    fi
 }
 
-
-
 function adbconn() {
-	local wlan=`adb shell ifconfig | grep wlan -A2 | grep "inet addr" | sed 's/.*inet addr:\([0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\).*/\1/g'`
-	echo "adb tcpip 5555"
-	adb tcpip 5555
-	echo "adb connect $wlan"
-	adb connect $wlan
-	export ADBCONN=$wlan
+    local wlan=`adb shell ifconfig | grep wlan -A2 | grep "inet addr" | sed 's/.*inet addr:\([0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\).*/\1/g'`
+    echo "adb tcpip 5555"
+    adb tcpip 5555
+    echo "adb connect $wlan"
+    adb connect $wlan
+    export ADBCONN=$wlan
 }
 
 function gettop()
